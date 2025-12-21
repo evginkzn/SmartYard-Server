@@ -120,3 +120,14 @@ asterisk/extconfig.conf
 asterisk/http.conf
 asterisk/pjsip.conf
 asterisk/logger.conf
+
+# Local development files
+tmp/
+DEPLOYMENT_LOG.md
+DEPLOY_PLAN.md
+SPUTNIK_INTEGRATION_PLAN.md
+
+# Local installation configs (contain passwords)
+install/mosquitto/passwd
+install/pgbouncer/pgbouncer.ini
+install/pgbouncer/userlist.txt
