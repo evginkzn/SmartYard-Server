@@ -4,7 +4,10 @@
  * Test monitoring status for SputnikIP
  */
 
+global $config;
 require_once __DIR__ . '/server/utils/loader.php';
+require_once __DIR__ . '/server/backends/backend.php';
+$config = loadConfiguration();
 
 $url = $argv[1] ?? 'http://localhost:8080';
 $credentials = $argv[2] ?? 'admin:adminpass';
