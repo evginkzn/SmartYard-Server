@@ -5,7 +5,6 @@
  */
 
 require_once __DIR__ . '/server/utils/loader.php';
-require_once __DIR__ . '/server/utils/backend.php';
 
 $url = $argv[1] ?? 'http://localhost:8080';
 $credentials = $argv[2] ?? 'admin:adminpass';
