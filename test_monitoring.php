@@ -27,20 +27,25 @@ try {
 echo "\n";
 
 // Test 2: Simple monitoring backend
-echo "[2] Testing simple monitoring backend...\n";
+echo "[2] Testing monitoring backend...\n";
 try {
     $monitoring = loadBackend('monitoring');
-    echo "    Backend class: " . get_class($monitoring) . "\n";
+    if (!$monitoring) {
+        echo "    WARNING: monitoring backend not configured!\n";
+        echo "    Add to config.json: \"backends\": { \"monitoring\": { \"backend\": \"simple\" } }\n";
+    } else {
+        echo "    Backend class: " . get_class($monitoring) . "\n";
 
-    $testHost = [
-        'hostId' => 999,
-        'enabled' => true,
-        'ip' => parse_url($url, PHP_URL_HOST),
-        'url' => $url,
-    ];
+        $testHost = [
+            'hostId' => 999,
+            'enabled' => true,
+            'ip' => parse_url($url, PHP_URL_HOST),
+            'url' => $url,
+        ];
 
-    $status = $monitoring->deviceStatus('domophone', $testHost);
-    echo "    Status: " . json_encode($status) . "\n";
+        $status = $monitoring->deviceStatus('domophone', $testHost);
+        echo "    Status: " . json_encode($status) . "\n";
+    }
 } catch (Exception $e) {
     echo "    FAIL: " . $e->getMessage() . "\n";
 }
@@ -64,20 +69,24 @@ echo "\n";
 
 // Test 4: Batch status check
 echo "[4] Testing batch devicesStatus...\n";
-try {
-    $hosts = [
-        [
-            'hostId' => 1,
-            'enabled' => true,
-            'ip' => $host,
-            'url' => $url,
-        ],
-    ];
+if (!$monitoring) {
+    echo "    SKIP - no monitoring backend\n";
+} else {
+    try {
+        $hosts = [
+            [
+                'hostId' => 1,
+                'enabled' => true,
+                'ip' => $host,
+                'url' => $url,
+            ],
+        ];
 
-    $statuses = $monitoring->devicesStatus('domophone', $hosts);
-    echo "    Result: " . json_encode($statuses, JSON_PRETTY_PRINT) . "\n";
-} catch (Exception $e) {
-    echo "    FAIL: " . $e->getMessage() . "\n";
+        $statuses = $monitoring->devicesStatus('domophone', $hosts);
+        echo "    Result: " . json_encode($statuses, JSON_PRETTY_PRINT) . "\n";
+    } catch (Exception $e) {
+        echo "    FAIL: " . $e->getMessage() . "\n";
+    }
 }
 
 echo "\n=== Done ===\n";
