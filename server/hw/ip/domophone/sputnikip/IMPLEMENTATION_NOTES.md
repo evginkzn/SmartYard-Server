@@ -63,8 +63,15 @@ server/hw/ip/
 trait sputnikip {
     // Инициализация
     protected function initializeProperties(): void {
-        $this->login = 'admin';           // Нужно создать пользователя!
+        $this->login = 'admin';
         $this->defaultPassword = 'adminpass';
+    }
+
+    // Парсинг credentials (login:password или просто password)
+    protected function parseCredentials(): void {
+        if (str_contains($this->password, ':')) {
+            [$this->login, $this->password] = explode(':', $this->password, 2);
+        }
     }
 
     // HTTP клиент
@@ -256,9 +263,15 @@ class sputnikip extends domophone {
 ## Особенности реализации
 
 ### 1. Авторизация
-- Нельзя использовать пользователя `admin` для API
-- Нужно создать отдельного пользователя через Web UI или API
+- По умолчанию: логин `admin`, пароль `adminpass`
 - Basic Auth: `Authorization: Basic base64(login:password)`
+- **Формат поля "Авторизация" в SmartYard:**
+  - `password` — использует дефолтный логин `admin`
+  - `login:password` — использует кастомные логин и пароль
+- Примеры:
+  - `adminpass` → login=admin, password=adminpass
+  - `admin:adminpass` → login=admin, password=adminpass
+  - `apiuser:secret123` → login=apiuser, password=secret123
 
 ### 2. Формат ключей RFID
 - Формат: HEX строка (например: `0A40D8E4`)
@@ -286,7 +299,8 @@ class sputnikip extends domophone {
 **Файл:** `server/hw/ip/common/sputnikip/sputnikip.php`
 
 Реализованные методы:
-- [x] `initializeProperties()` — логин `admin`, пароль `admin`
+- [x] `initializeProperties()` — логин `admin`, пароль `adminpass`
+- [x] `parseCredentials()` — парсинг формата `login:password`
 - [x] `apiCall()` — HTTP клиент с Basic Auth (cURL)
 - [x] `getSysinfo()` — GET /api/device/status
 - [x] `reboot()` — POST /api/device/reboot

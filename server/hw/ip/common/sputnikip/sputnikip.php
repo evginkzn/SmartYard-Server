@@ -7,9 +7,41 @@ namespace hw\ip\common\sputnikip;
  *
  * Unlike cloud-based Sputnik devices that use GraphQL API,
  * SputnikIP devices use direct REST API with Basic Auth.
+ *
+ * Credentials format: "login:password" or just "password" (uses default login "admin").
  */
 trait sputnikip
 {
+    /**
+     * @var bool Flag indicating if credentials have been parsed.
+     */
+    protected bool $credentialsParsed = false;
+
+    /**
+     * Parse credentials from password field.
+     *
+     * Supports formats:
+     * - "password" - uses default login (admin)
+     * - "login:password" - uses custom login and password
+     *
+     * @return void
+     */
+    protected function parseCredentials(): void
+    {
+        if ($this->credentialsParsed) {
+            return;
+        }
+
+        $this->credentialsParsed = true;
+
+        // Check if password contains login:password format
+        if (str_contains($this->password, ':')) {
+            $parts = explode(':', $this->password, 2);
+            $this->login = $parts[0];
+            $this->password = $parts[1];
+        }
+    }
+
     /**
      * Make an API call to the device.
      *
@@ -26,6 +58,9 @@ trait sputnikip
         array $data = [],
         int $timeout = 30,
     ): array {
+        // Parse credentials on first API call
+        $this->parseCredentials();
+
         $url = rtrim($this->url, '/') . '/' . ltrim($endpoint, '/');
 
         $ch = curl_init($url);
@@ -178,6 +213,6 @@ trait sputnikip
     protected function initializeProperties(): void
     {
         $this->login = 'admin';
-        $this->defaultPassword = 'admin';
+        $this->defaultPassword = 'adminpass';
     }
 }
