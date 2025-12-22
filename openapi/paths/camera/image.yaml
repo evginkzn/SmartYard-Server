@@ -1,0 +1,379 @@
+get:
+  summary: Получить настройки изображения
+  description: |
+    Возвращает текущие настройки изображения камеры, включая яркость, контраст,
+    WDR, BLC, HLC и шумоподавление.
+  tags:
+    - Camera
+  security:
+    - basicAuth: []
+  responses:
+    '200':
+      description: Успешный ответ с настройками изображения
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              brightness:
+                type: number
+                minimum: 0
+                maximum: 255
+                description: Уровень яркости изображения (0-255)
+              brightnessAuto:
+                type: boolean
+                description: Автоматическая настройка яркости
+              contrast:
+                type: number
+                minimum: 0
+                maximum: 255
+                description: Уровень контрастности изображения (0-255)
+              contrastAuto:
+                type: boolean
+                description: Автоматическая настройка контрастности
+              saturation:
+                type: number
+                minimum: 0
+                maximum: 255
+                description: Уровень насыщенности изображения (0-255)
+              saturationAuto:
+                type: boolean
+                description: Автоматическая настройка насыщенности
+              sharpness:
+                type: number
+                minimum: 0
+                maximum: 255
+                description: Уровень резкости изображения (0-255)
+              blc:
+                type: number
+                minimum: 0
+                maximum: 255
+                description: |
+                  Компенсация контрового света (Back Light Compensation).
+                  Осветляет тёмные области когда яркий свет позади объекта.
+                  0 = выключено, 255 = максимум
+              hlc:
+                type: number
+                minimum: 0
+                maximum: 255
+                description: |
+                  Компенсация яркого света (High Light Compensation).
+                  Подавляет фары и прожекторы.
+                  0 = выключено, 255 = максимум
+              nr2d:
+                type: number
+                minimum: 0
+                maximum: 255
+                description: Уровень 2D шумоподавления (0-255)
+              nr3d:
+                type: number
+                minimum: 0
+                maximum: 255
+                description: Уровень 3D шумоподавления (0-255)
+              powerFreq:
+                type: number
+                enum: [50, 60]
+                description: Частота электросети в Гц (50 или 60)
+              wdrEnabled:
+                type: boolean
+                description: |
+                  Включить широкий динамический диапазон (WDR).
+                  Балансирует яркие и тёмные области одновременно
+              wdrLevel:
+                type: number
+                minimum: 0
+                maximum: 255
+                description: Уровень WDR (0-255, игнорируется если wdrEnabled=false)
+              awbMode:
+                type: string
+                description: Режим автоматического баланса белого
+              awbRgain:
+                type: number
+                description: Усиление красного канала для баланса белого
+              awbBgain:
+                type: number
+                description: Усиление синего канала для баланса белого
+          example:
+            brightness: 191
+            brightnessAuto: false
+            contrast: 153
+            contrastAuto: false
+            saturation: 128
+            saturationAuto: false
+            sharpness: 50
+            blc: 0
+            hlc: 0
+            nr2d: 50
+            nr3d: 50
+            powerFreq: 50
+            wdrEnabled: true
+            wdrLevel: 50
+            awbMode: "auto"
+            awbRgain: 100
+            awbBgain: 100
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "Failed to get image settings"
+
+post:
+  summary: Изменить настройки изображения
+  description: |
+    Применяет новые настройки изображения камеры.
+
+    **Параметры коррекции:**
+    - **WDR** (Wide Dynamic Range): балансирует динамический диапазон, улучшает детали в тёмных и ярких областях
+    - **BLC** (Back Light Compensation): компенсирует контровый свет, осветляет тёмные области
+    - **HLC** (High Light Compensation): компенсирует яркие источники света (фары, прожекторы)
+
+    **Примеры сценариев:**
+    - Входная дверь (человек на фоне яркой улицы): `blc=200`
+    - Парковка ночью (фары автомобилей): `hlc=180`
+    - Вид из окна (яркий фон за объектом): `wdrEnabled=true, wdrLevel=120, blc=100`
+    - Распознавание номеров (подавление бликов фар): `hlc=150`
+  tags:
+    - Camera
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            brightness:
+              type: number
+              minimum: 0
+              maximum: 255
+              description: Уровень яркости (0-255)
+            brightnessAuto:
+              type: boolean
+              description: Автояркость
+            contrast:
+              type: number
+              minimum: 0
+              maximum: 255
+              description: Уровень контраста (0-255)
+            contrastAuto:
+              type: boolean
+              description: Автоконтраст
+            saturation:
+              type: number
+              minimum: 0
+              maximum: 255
+              description: Насыщенность (0-255)
+            saturationAuto:
+              type: boolean
+              description: Автонасыщенность
+            sharpness:
+              type: number
+              minimum: 0
+              maximum: 255
+              description: Резкость (0-255)
+            blc:
+              type: number
+              minimum: 0
+              maximum: 255
+              description: BLC - компенсация контрового света (0=выкл, 255=макс)
+            hlc:
+              type: number
+              minimum: 0
+              maximum: 255
+              description: HLC - подавление ярких источников (0=выкл, 255=макс)
+            nr2d:
+              type: number
+              minimum: 0
+              maximum: 255
+              description: 2D шумоподавление
+            nr3d:
+              type: number
+              minimum: 0
+              maximum: 255
+              description: 3D шумоподавление
+            powerFreq:
+              type: number
+              enum: [50, 60]
+              description: Частота сети (50 или 60 Гц)
+            wdrEnabled:
+              type: boolean
+              description: Включить WDR
+            wdrLevel:
+              type: number
+              minimum: 0
+              maximum: 255
+              description: Уровень WDR
+            awbMode:
+              type: string
+              description: Режим автоматического баланса белого
+            awbRgain:
+              type: number
+              description: Усиление красного канала для баланса белого
+            awbBgain:
+              type: number
+              description: Усиление синего канала для баланса белого
+        examples:
+          entrance_door:
+            summary: Входная дверь
+            description: Человек входит с яркой улицы - нужна компенсация контрового света
+            value:
+              brightness: 128
+              brightnessAuto: true
+              contrast: 128
+              contrastAuto: true
+              saturation: 128
+              saturationAuto: false
+              sharpness: 50
+              blc: 200
+              hlc: 0
+              nr2d: 50
+              nr3d: 50
+              powerFreq: 50
+              wdrEnabled: false
+              wdrLevel: 0
+          parking_night:
+            summary: Парковка ночью
+            description: Подавление фар автомобилей
+            value:
+              brightness: 128
+              brightnessAuto: true
+              contrast: 128
+              contrastAuto: true
+              saturation: 128
+              saturationAuto: false
+              sharpness: 50
+              blc: 0
+              hlc: 180
+              nr2d: 80
+              nr3d: 80
+              powerFreq: 50
+              wdrEnabled: false
+              wdrLevel: 0
+          window_view:
+            summary: Вид из окна
+            description: Баланс яркого фона и объекта - WDR + BLC
+            value:
+              brightness: 128
+              brightnessAuto: true
+              contrast: 128
+              contrastAuto: true
+              saturation: 128
+              saturationAuto: false
+              sharpness: 50
+              blc: 100
+              hlc: 80
+              nr2d: 50
+              nr3d: 50
+              powerFreq: 50
+              wdrEnabled: true
+              wdrLevel: 120
+          license_plate:
+            summary: Распознавание номеров
+            description: Подавление бликов от фар для чтения номеров
+            value:
+              brightness: 128
+              brightnessAuto: false
+              contrast: 160
+              contrastAuto: false
+              saturation: 100
+              saturationAuto: false
+              sharpness: 80
+              blc: 0
+              hlc: 150
+              nr2d: 40
+              nr3d: 40
+              powerFreq: 50
+              wdrEnabled: false
+              wdrLevel: 0
+          disable_all:
+            summary: Отключить все коррекции
+            description: Чистое изображение без обработки
+            value:
+              brightness: 128
+              brightnessAuto: false
+              contrast: 128
+              contrastAuto: false
+              saturation: 128
+              saturationAuto: false
+              sharpness: 50
+              blc: 0
+              hlc: 0
+              nr2d: 0
+              nr3d: 0
+              powerFreq: 50
+              wdrEnabled: false
+              wdrLevel: 0
+  responses:
+    '200':
+      description: Настройки успешно применены
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+          example:
+            status: "ok"
+    '400':
+      description: Ошибка валидации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          examples:
+            invalid_range:
+              summary: Значение вне допустимого диапазона
+              value:
+                error: "brightness must be between 0 and 255"
+            invalid_freq:
+              summary: Неверная частота сети
+              value:
+                error: "powerFreq must be 50 or 60"
+            invalid_type:
+              summary: Неверный тип данных
+              value:
+                error: "wdrEnabled must be boolean"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "Failed to apply image settings"

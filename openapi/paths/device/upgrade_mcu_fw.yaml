@@ -1,0 +1,111 @@
+post:
+  summary: Обновить прошивку MCU (микроконтроллер)
+  description: |
+    Загружает и устанавливает прошивку для микроконтроллера (MCU) домофона.
+
+    **Процесс обновления:**
+    1. Файл прошивки загружается на устройство
+    2. Сохраняется в `/overlay/firmware.bin`
+    3. Запускается процесс обновления MCU из внутреннего хранилища
+    4. MCU автоматически перезагружается с новой прошивкой
+
+    **Требования к файлу:**
+    - Формат: бинарный файл прошивки MCU (`.bin`)
+    - Размер: зависит от модели MCU (обычно до 512 KB)
+    - Должен быть совместим с установленным микроконтроллером
+
+    **⚠️ ВАЖНО:**
+    - Используйте только официальные файлы прошивки от производителя
+    - Неправильная прошивка может привести к неработоспособности домофона
+    - Убедитесь в стабильности питания во время обновления
+    - Процесс обновления может занять до 2 минут
+    - Не отключайте питание до завершения обновления
+
+    **Примечание:** После успешной загрузки возвращается статус 204 (No Content).
+    Проверить статус обновления можно через `/api/device/status`.
+  tags:
+    - Device
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          required:
+            - file
+          properties:
+            file:
+              type: string
+              format: binary
+              description: |
+                Бинарный файл прошивки MCU.
+                Файл должен иметь расширение `.bin` и быть совместим с установленным MCU.
+        encoding:
+          file:
+            contentType: application/octet-stream
+  responses:
+    '204':
+      description: |
+        Прошивка успешно загружена и процесс обновления запущен.
+
+        Обновление выполняется асинхронно. MCU перезагрузится автоматически
+        после завершения обновления. Статус 204 означает, что запрос принят к обработке,
+        но содержимое ответа отсутствует.
+    '400':
+      description: Ошибка валидации или обработки файла
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            no_file:
+              summary: Файл не загружен
+              value:
+                error: "No file uploaded"
+            invalid_file:
+              summary: Некорректный файл прошивки
+              value:
+                error: "Invalid firmware file format"
+            upgrade_failed:
+              summary: Ошибка запуска обновления
+              value:
+                error: "Failed to upgrade MCU firmware: ..."
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+    '413':
+      description: Файл слишком большой
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "Payload too large"
+    '500':
+      description: Внутренняя ошибка сервера при сохранении файла
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "Failed to create/open file"

@@ -1,0 +1,405 @@
+get:
+  description: "Возвращает список кодов доступа домофона"
+  parameters:
+    - name: flat
+      in: query
+      description: "Фильтр по номеру квартиры. Поддерживает один номер (например, 15) или список через запятую (например, 15,16,17)"
+      required: false
+      schema:
+        type: string
+        example: "15"
+    - name: flats
+      in: query
+      description: "Альтернативное название для flat. Фильтр по номеру квартиры"
+      required: false
+      schema:
+        type: string
+        example: "15,16,17"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              codes:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    value:
+                      type: string
+                      description: Значение кода доступа
+                    expTime:
+                      type: string
+                      nullable: true
+                      description: Время истечения срока действия кода
+                    flatNumber:
+                      type: integer
+                      nullable: true
+                      description: Номер квартиры, к которой привязан код
+              totalCount:
+                type: integer
+                description: Общее количество кодов
+          example:
+            codes:
+              - value: "0123"
+                expTime: "2024-12-31T23:59:59"
+                flatNumber: 101
+              - value: "12345"
+                expTime: null
+                flatNumber: null
+            totalCount: 2
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки получения кодов
+          example:
+            error: "digital keys not found in configuration"
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Сообщение об ошибке
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Сообщение об ошибке
+  summary: Получить список кодов
+  tags:
+  - Intercom
+post:
+  description: "Добавляет новый код доступа домофона"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            codes:
+              type: array
+              items:
+                type: object
+                properties:
+                  value:
+                    type: string
+                    description: Значение кода доступа (4 или 5 цифр, 4-значные коды должны начинаться с 0)
+                  expTime:
+                    type: string
+                    description: Время истечения срока действия кода
+                  description:
+                    type: string
+                    description: Описание кода доступа
+                  flatNumber:
+                    type: integer
+                    nullable: true
+                    description: Номер квартиры, к которой привязан код
+        example:
+          codes:
+            - value: "0123"
+              expTime: "2024-12-31T23:59:59"
+              description: "Код для курьеров"
+              flatNumber: 101
+            - value: "12345"
+              expTime: "2024-12-31T23:59:59"
+              description: "Код для уборщиков"
+              flatNumber: null
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  message:
+                    type: string
+                    enum: ["codes added successfully"]
+                    description: Сообщение об успешном выполнении
+                required: ["message"]
+                example:
+                  message: "codes added successfully"
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    description: Предупреждение, если коды сохранены но конфигурация не применена
+                required: ["error"]
+                example:
+                  error: "update was successful, but the config was not applied due to: connection timeout"
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Сообщение об ошибке
+          examples:
+            emptyBody:
+              value:
+                error: "request body is empty"
+            invalidJson:
+              value:
+                error: "invalid json format"
+            missingCodes:
+              value:
+                error: "codes array is required"
+            emptyCodes:
+              value:
+                error: "codes array cannot be empty"
+            invalidCodeFormat:
+              value:
+                error: "digital key value must be 4 or 5 digits long"
+            invalidCodeStart:
+              value:
+                error: "4-digit codes must start with '0'"
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Сообщение об ошибке
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Сообщение об ошибке
+  summary: Добавить код открытия
+  tags:
+  - Intercom
+delete:
+  description: "Удаляет код доступа домофона. Можно удалить конкретные коды (передав массив codes в теле запроса) или все коды сразу (используя параметр ?all=true)"
+  parameters:
+    - name: all
+      in: query
+      description: "Если true или 1, удаляет все цифровые коды (тело запроса игнорируется)"
+      required: false
+      schema:
+        type: string
+        enum: ["true", "1"]
+        example: "true"
+  requestBody:
+    required: false
+    description: "Обязательно только если не используется параметр ?all=true"
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            codes:
+              type: array
+              items:
+                type: object
+                properties:
+                  value:
+                    type: string
+                    description: Значение кода доступа для удаления
+        example:
+          codes:
+            - value: "0123"
+            - value: "12345"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  message:
+                    type: string
+                    enum: ["codes deleted successfully"]
+                    description: Сообщение об успешном удалении
+                required: ["message"]
+                example:
+                  message: "codes deleted successfully"
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    description: Предупреждение, если коды удалены но конфигурация не применена
+                required: ["error"]
+                example:
+                  error: "update was successful, but the config was not applied due to: connection timeout"
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Сообщение об ошибке
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Сообщение об ошибке
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Сообщение об ошибке
+  summary: Удалить код открытия
+  tags:
+  - Intercom
+put:
+  description: "Создает новые цифровые коды или обновляет существующие (операция upsert). Если код с указанным value существует, он будет обновлен. Если не существует, будет создан новый код."
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            codes:
+              type: array
+              description: Список кодов для создания или обновления
+              items:
+                type: object
+                required:
+                  - value
+                properties:
+                  value:
+                    type: string
+                    description: Значение кода (4 или 5 цифр, 4-значные должны начинаться с 0)
+                  expTime:
+                    type: string
+                    nullable: true
+                    description: Время истечения срока действия кода (ISO 8601 формат, может быть null)
+                  flatNumber:
+                    type: integer
+                    nullable: true
+                    description: Номер квартиры, к которой привязан код (может быть null)
+        example: {
+          "codes": [
+            {
+              "value": "0123",
+              "expTime": "2024-12-31T23:59:59",
+              "flatNumber": 101
+            },
+            {
+              "value": "12345",
+              "expTime": null,
+              "flatNumber": null
+            }
+          ]
+        }
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  status:
+                    type: string
+                    enum: ["ok"]
+                required: [status]
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    description: Предупреждение о том, что настройки сохранены, но конфигурация не применена
+                required: [error]
+          examples:
+            success:
+              summary: Успешное создание/обновление кодов
+              value:
+                status: "ok"
+            warning:
+              summary: Настройки сохранены, но конфигурация не применена
+              value:
+                error: "update was successful, but the config was not applied due to: Connection timeout"
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            missing_value:
+              summary: Отсутствует обязательное поле value
+              value:
+                error: "each code must have a 'value' string"
+            invalid_format:
+              summary: Некорректный формат кода
+              value:
+                error: "digital key value must be 4 or 5 digits long"
+            invalid_4digit:
+              summary: 4-значный код не начинается с 0
+              value:
+                error: "4-digit codes must start with '0'"
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+  summary: Создать или обновить цифровые коды
+  tags:
+  - Intercom

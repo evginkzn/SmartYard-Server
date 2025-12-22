@@ -1,0 +1,188 @@
+get:
+  security:
+    - basicAuth: []
+  description: 'Возвращает текущие настройки громкости домофона'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              systemVolume:
+                type: integer
+                description: Уровень громкости системных звуков (0-100)
+                minimum: 1
+                maximum: 100
+              microphoneVolume:
+                type: integer
+                description: Уровень громкости микрофона (0-100)
+                minimum: 1
+                maximum: 100
+              voiceVolume:
+                type: integer
+                description: Уровень громкости динамика во время разговора (0-100)
+                minimum: 1
+                maximum: 100
+              sipVolume:
+                type: integer
+                description: Уровень громкости динамика во время SIP-звонка (0-100)
+                minimum: 1
+                maximum: 100
+          example:
+            systemVolume: 80
+            microphoneVolume: 70
+            voiceVolume: 75
+            sipVolume: 80
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки получения настроек звука
+            example:
+              error: "Failed to get volume settings"
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки аутентификации
+            example:
+              error: "authentication failed"
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание внутренней ошибки сервера
+            example:
+              error: "internal server error"
+  summary: Получить настройки звука
+  tags:
+  - Intercom
+post:
+  security:
+    - basicAuth: []
+  description: 'Применяет новые настройки громкости домофона'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - systemVolume
+            - microphoneVolume
+            - voiceVolume
+            - sipVolume
+          properties:
+            systemVolume:
+              type: integer
+              description: Уровень громкости системных звуков (0-100)
+              minimum: 1
+              maximum: 100
+            microphoneVolume:
+              type: integer
+              description: Уровень громкости микрофона (0-100)
+              minimum: 1
+              maximum: 100
+            voiceVolume:
+              type: integer
+              description: Уровень громкости динамика во время разговора (0-100)
+              minimum: 1
+              maximum: 100
+            sipVolume:
+              type: integer
+              description: Уровень громкости динамика во время SIP-звонка (0-100)
+              minimum: 1
+              maximum: 100
+          example:
+            systemVolume: 80
+            microphoneVolume: 70
+            voiceVolume: 75
+            sipVolume: 80
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  status:
+                    type: string
+                    enum: ["success"]
+                    description: Статус выполнения операции
+                required: ["status"]
+                example:
+                  status: "success"
+              - type: object
+                properties:
+                  warning:
+                    type: string
+                    description: Предупреждение, если настройки сохранены но не применены
+                required: ["warning"]
+                example:
+                  warning: "Settings saved but not applied: connection timeout"
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки валидации
+            examples:
+              missing_field:
+                value:
+                  error: "Missing required field: systemVolume"
+              invalid_range:
+                value:
+                  error: "field systemVolume must be between 1 and 100"
+              invalid_type:
+                value:
+                  error: "field systemVolume must be an integer"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки аутентификации
+            example:
+              error: "authentication failed"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание внутренней ошибки сервера
+            example:
+              error: "internal server error"
+  summary: Изменить настройки звука
+  tags:
+  - Intercom

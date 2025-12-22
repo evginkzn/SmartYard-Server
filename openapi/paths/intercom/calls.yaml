@@ -1,0 +1,183 @@
+get:
+  summary: Получить настройки вызова
+  description: "Возвращает настройки вызовов домофона"
+  security:
+    - basicAuth: []
+  tags:
+  - Intercom
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              flatCallTimeTimeout:
+                type: integer
+                description: Таймаут разговора с квартирой в секундах
+                example: 30
+              flatDialingTimeTimeout:
+                type: integer
+                description: Таймаут набора номера квартиры в секундах
+                example: 10
+              defaultThresholdCall:
+                type: number
+                format: float
+                description: Порог по умолчанию для вызова
+                example: 5.5
+              defaultThresholdDoor:
+                type: number
+                format: float
+                description: Порог по умолчанию для двери
+                example: 6.0
+              commutatorType:
+                type: string
+                description: Тип коммутатора
+                enum: [VIZIT, CYFRAL, METACOM, ELTIS, DAXYS, BEWARD]
+                example: VIZIT
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки получения настроек
+                example: "Failed to get calls settings"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки аутентификации
+                example: "authentication failed"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "internal server error"
+post:
+  summary: Изменить настройки вызова
+  description: "Применяет новые настройки вызовов домофона"
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - flatCallTimeTimeout
+            - flatDialingTimeTimeout
+            - defaultThresholdCall
+            - defaultThresholdDoor
+            - commutatorType
+          properties:
+            flatCallTimeTimeout:
+              type: integer
+              description: Таймаут разговора с квартирой в секундах
+              minimum: 0
+              maximum: 3600
+              example: 30
+            flatDialingTimeTimeout:
+              type: integer
+              description: Таймаут набора номера квартиры в секундах
+              minimum: 0
+              maximum: 3600
+              example: 10
+            defaultThresholdCall:
+              type: number
+              format: float
+              description: Порог по умолчанию для вызова
+              minimum: 1.0
+              maximum: 12.0
+              example: 5.5
+            defaultThresholdDoor:
+              type: number
+              format: float
+              description: Порог по умолчанию для двери
+              minimum: 1.0
+              maximum: 12.0
+              example: 6.0
+            commutatorType:
+              type: string
+              description: Тип коммутатора
+              enum: [VIZIT, CYFRAL, METACOM, ELTIS, DAXYS, BEWARD]
+              example: VIZIT
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  status:
+                    type: string
+                    enum: ["success"]
+                    description: Статус выполнения операции
+                required: ["status"]
+                example:
+                  status: "success"
+              - type: object
+                properties:
+                  warning:
+                    type: string
+                    description: Предупреждение, если настройки сохранены но не применены
+                required: ["warning"]
+                example:
+                  warning: "settings saved but not applied: connection timeout"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки аутентификации
+                example: "authentication failed"
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                examples:
+                  - "request body is empty"
+                  - "invalid JSON format"
+                  - "missing required field: flatCallTimeTimeout"
+                  - "flatCallTimeTimeout must be an integer"
+                  - "flatCallTimeTimeout cannot be more than 3600 seconds (1 hour)"
+                  - "defaultThresholdCall must be between 1.0 and 12.0"
+                  - "commutatorType must be one of: VIZIT, CYFRAL, METACOM, ELTIS, DAXYS, BEWARD"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "internal server error"
+  tags:
+  - Intercom

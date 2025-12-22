@@ -1,0 +1,156 @@
+get:
+  description: "Возвращает настройки основного потока и подпотока"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mainStream:
+                type: object
+                description: Настройки основного потока
+                properties:
+                  status:
+                    type: boolean
+                    description: Состояние основного потока
+                  resolution:
+                    type: string
+                    description: Разрешение основного потока
+                  bitrate:
+                    type: number
+                    description: Битрейт основного потока
+                  rateType:
+                    type: string
+                    description: Тип контроля битрейта
+                  fps:
+                    type: number
+                    description: Кадров в секунду
+                  frameInterval:
+                    type: number
+                    description: Интервал между кадрами
+              subStream:
+                type: object
+                description: Настройки дополнительного потока
+                properties:
+                  status:
+                    type: boolean
+                    description: Состояние дополнительного потока
+                  resolution:
+                    type: string
+                    description: Разрешение дополнительного потока
+                  bitrate:
+                    type: number
+                    description: Битрейт дополнительного потока
+                  rateType:
+                    type: string
+                    description: Тип контроля битрейта
+                  fps:
+                    type: number
+                    description: Кадров в секунду
+                  frameInterval:
+                    type: number
+                    description: Интервал между кадрами
+          example:
+            mainStream:
+              status: true
+              resolution: "1920x1080"
+              bitrate: 2048
+              rateType: "CBR"
+              fps: 25
+              frameInterval: 50
+            subStream:
+              status: true
+              resolution: "640x480"
+              bitrate: 512
+              rateType: "CBR"
+              fps: 15
+              frameInterval: 30
+  summary: Получить настройки потока
+  tags:
+  - Camera
+post:
+  description: "Применяет новые настройки основного потока и подпотока"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            mainStream:
+              type: object
+              description: Настройки основного потока
+              properties:
+                status:
+                  type: boolean
+                  description: Состояние основного потока
+                resolution:
+                  type: string
+                  description: Разрешение основного потока
+                bitrate:
+                  type: number
+                  description: Битрейт основного потока
+                rateType:
+                  type: string
+                  description: Тип контроля битрейта
+                fps:
+                  type: number
+                  description: Кадров в секунду
+                frameInterval:
+                  type: number
+                  description: Интервал между кадрами
+            subStream:
+              type: object
+              description: Настройки дополнительного потока
+              properties:
+                status:
+                  type: boolean
+                  description: Состояние дополнительного потока
+                resolution:
+                  type: string
+                  description: Разрешение дополнительного потока
+                bitrate:
+                  type: number
+                  description: Битрейт дополнительного потока
+                rateType:
+                  type: string
+                  description: Тип контроля битрейта
+                fps:
+                  type: number
+                  description: Кадров в секунду
+                frameInterval:
+                  type: number
+                  description: Интервал между кадрами
+        example:
+          mainStream:
+            status: true
+            resolution: "1920x1080"
+            bitrate: 2048
+            rateType: "CBR"
+            fps: 25
+            frameInterval: 50
+          subStream:
+            status: true
+            resolution: "640x480"
+            bitrate: 512
+            rateType: "CBR"
+            fps: 15
+            frameInterval: 30
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "ok"
+  summary: Изменить настройки потока
+  tags:
+  - Camera

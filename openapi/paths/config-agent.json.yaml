@@ -1,0 +1,207 @@
+get:
+  summary: Получить полную конфигурацию устройства
+  description: |
+    Возвращает полное содержимое файла конфигурации `/overlay/config-agent.json`.
+
+    Этот эндпоинт предоставляет доступ ко всей конфигурации устройства, включая:
+    - **device** - настройки устройства (сеть, пользователи, сервисы, лицензия)
+    - **intercom** - конфигурация домофона (квартиры, ключи, SIP, звонки, двери)
+    - **camera** - настройки камеры (кодирование, изображение, аудио, OSD, детекция движения)
+
+    **Использование:**
+    - Резервное копирование конфигурации
+    - Миграция настроек между устройствами
+    - Отладка и диагностика
+    - Массовое управление настройками
+
+    **Внимание:** Ответ может содержать чувствительные данные (пароли, токены).
+    Используйте HTTPS для безопасной передачи.
+  tags:
+    - Device
+  security:
+    - basicAuth: []
+  responses:
+    '200':
+      description: Конфигурация успешно получена
+      content:
+        application/json:
+          schema:
+            type: object
+            description: Полная структура конфигурации устройства
+            properties:
+              device:
+                type: object
+                description: Настройки устройства
+                properties:
+                  license:
+                    type: object
+                    properties:
+                      mode:
+                        type: string
+                        enum: ["STANDALONE", "CLOUD"]
+                        description: Режим работы домофона
+                      activation_key:
+                        type: string
+                        description: Ключ активации лицензии
+                  config:
+                    type: object
+                    properties:
+                      network:
+                        type: object
+                        description: Сетевые настройки
+                      users:
+                        type: array
+                        description: Пользователи устройства
+                        items:
+                          type: object
+                      service:
+                        type: object
+                        description: Настройки сервисов (web_port, syslog, metrics)
+                      time:
+                        type: object
+                        description: Настройки времени (NTP, timezone)
+              intercom:
+                type: object
+                description: Настройки домофона
+                properties:
+                  config:
+                    type: object
+                    properties:
+                      sip:
+                        type: object
+                        description: SIP настройки
+                      flats:
+                        type: array
+                        description: Список квартир
+                      keys:
+                        type: array
+                        description: RFID ключи
+                      codes:
+                        type: array
+                        description: Цифровые коды доступа
+                      calls:
+                        type: object
+                        description: Настройки звонков
+                      audio:
+                        type: object
+                        description: Аудио настройки
+                      door_settings:
+                        type: object
+                        description: Настройки дверей
+                      gate:
+                        type: object
+                        description: Настройки шлагбаума
+                      sos:
+                        type: object
+                        description: Настройки SOS кнопки
+              camera:
+                type: object
+                description: Настройки камеры
+                properties:
+                  config:
+                    type: object
+                    properties:
+                      encode:
+                        type: object
+                        description: Настройки кодирования (H264, JPEG)
+                      image:
+                        type: object
+                        description: Настройки изображения (яркость, контраст, и т.д.)
+                      audio:
+                        type: object
+                        description: Настройки аудио
+                      osd:
+                        type: object
+                        description: Настройки экранного меню
+                      motion:
+                        type: object
+                        description: Настройки детекции движения
+                  service:
+                    type: object
+                    properties:
+                      rtsp_port:
+                        type: integer
+                        description: Порт RTSP сервера
+                      rtsp_enable:
+                        type: boolean
+                        description: Включен ли RTSP сервер
+                      onvif_enable:
+                        type: boolean
+                        description: Включен ли ONVIF
+          example:
+            device:
+              license:
+                mode: "STANDALONE"
+                activation_key: ""
+              config:
+                network:
+                  dhcp: true
+                  ip: "192.168.1.100"
+                  mask: "255.255.255.0"
+                  gateway: "192.168.1.1"
+                  dns1: "8.8.8.8"
+                  dns2: "8.8.4.4"
+                users:
+                  - username: "admin"
+                    password: "admin"
+                    accessLevel: "admin"
+                    token: "..."
+                service:
+                  web_port: 80
+                  syslog_server: "127.0.0.1"
+                  syslog_port: 514
+                time:
+                  ntp:
+                    enabled: true
+                    servers: ["pool.ntp.org"]
+                  timezone: "Europe/Moscow"
+            intercom:
+              config:
+                sip:
+                  server: "sip.example.com"
+                  port: 5060
+                  username: "100"
+                flats:
+                  - num: 1
+                    alias: "Квартира 1"
+                    sipAddress: "sip:101@sip.example.com"
+                keys: []
+                codes: []
+            camera:
+              config:
+                encode:
+                  main_stream:
+                    resolution: "1920x1080"
+                    fps: 25
+                    bitrate: 2048
+              service:
+                rtsp_port: 554
+                rtsp_enable: true
+    '400':
+      description: Ошибка при чтении файла конфигурации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            file_not_found:
+              value:
+                error: "Could not open configuration file"
+            parse_error:
+              value:
+                error: "JSON parse error: ..."
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"

@@ -1,0 +1,77 @@
+post:
+  description: "Выполняет тестовый звонок в аналоговую линию"
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - flat
+          properties:
+            flat:
+              type: integer
+              minimum: 1
+              maximum: 9999
+              description: Номер квартиры для тестового звонка
+        example:
+          flat: 1
+  responses:
+    '200':
+      description: Тест выполнен успешно
+      content:
+        application/json:
+          schema:
+            type: object
+            description: Результат выполнения тестового звонка (возвращается от WebSocket сервера)
+          example:
+            status: "ok"
+            message: "Analog call test completed successfully"
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки валидации
+                examples:
+                  - "request body is empty"
+                  - "invalid JSON format"
+                  - "missing required field: flat"
+                  - "flat must be an integer"
+                  - "flat number must be positive"
+                  - "flat number must be between 1 and 9999"
+          example:
+            error: "flat number must be between 1 and 9999"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки аутентификации
+          example:
+            error: "authentication failed"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание внутренней ошибки сервера
+          example:
+            error: "test execution failed"
+  summary: Тестовый звонок в аналоговую линию
+  tags:
+  - Intercom

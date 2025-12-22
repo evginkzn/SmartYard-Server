@@ -1,0 +1,46 @@
+post:
+  description: "Переключает IR-Cut фильтр между ручным и автоматическим режимом работы"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            ircut_auto:
+              type: boolean
+              description: "true для автоматического управления IR-Cut, false для ручного"
+          required:
+            - ircut_auto
+        example:
+          ircut_auto: true
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "success"
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              message:
+                type: string
+          example:
+            status: "error"
+            message: "ircut_auto must be boolean"
+  summary: Установить режим управления IR-Cut фильтром
+  tags:
+  - Camera

@@ -1,0 +1,14 @@
+get:
+  description: "Возвращает текущий снимок с камеры в формате JPEG"
+  responses:
+    '200':
+      description: OK
+      content:
+        image/jpeg:
+          schema:
+            type: string
+            format: binary
+            description: JPEG изображение
+  summary: Получить снапшот в JPG
+  tags:
+  - Camera

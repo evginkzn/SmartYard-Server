@@ -1,0 +1,93 @@
+get:
+  summary: Получить список доступных аудио кодеков
+  description: |
+    Возвращает список всех поддерживаемых аудио кодеков, которые можно использовать для SIP вызовов.
+    Эти кодеки доступны для выбора при настройке приоритетов через PUT /api/intercom/sip/codecs.
+
+    **Типы кодеков:**
+    - **Narrowband (8 kHz)**: PCMU, PCMA, G729 - стандартное качество телефонии
+    - **Wideband (16 kHz)**: G722 - улучшенное качество голоса
+    - **Fullband (48 kHz)**: Opus - высокое качество, адаптивный битрейт
+  tags:
+    - Intercom
+  security:
+    - basicAuth: []
+  responses:
+    '200':
+      description: Список доступных кодеков
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              available_codecs:
+                type: array
+                description: Список поддерживаемых кодеков
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      description: Название кодека
+                    description:
+                      type: string
+                      description: Описание кодека
+                    sample_rate:
+                      type: integer
+                      description: Частота дискретизации в Гц
+                    bitrate:
+                      type: integer
+                      description: Битрейт в кбит/с (или диапазон для адаптивных кодеков)
+                    bandwidth:
+                      type: string
+                      enum: ["narrowband", "wideband", "fullband"]
+                      description: Тип полосы частот
+          example:
+            available_codecs:
+              - name: "PCMU"
+                description: "G.711 μ-law"
+                sample_rate: 8000
+                bitrate: 64
+                bandwidth: "narrowband"
+              - name: "PCMA"
+                description: "G.711 A-law"
+                sample_rate: 8000
+                bitrate: 64
+                bandwidth: "narrowband"
+              - name: "G722"
+                description: "G.722 Wideband"
+                sample_rate: 16000
+                bitrate: 64
+                bandwidth: "wideband"
+              - name: "opus"
+                description: "Opus codec (adaptive)"
+                sample_rate: 48000
+                bitrate: 32
+                bandwidth: "fullband"
+              - name: "G729"
+                description: "G.729 (low bitrate)"
+                sample_rate: 8000
+                bitrate: 8
+                bandwidth: "narrowband"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "internal server error"

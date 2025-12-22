@@ -1,0 +1,207 @@
+get:
+  summary: Получить настройки аудио кодеков SIP
+  description: |
+    Возвращает текущий список выбранных аудио кодеков для SIP вызовов с их приоритетами.
+    Кодеки с меньшим значением priority имеют более высокий приоритет при согласовании.
+  tags:
+    - Intercom
+  security:
+    - basicAuth: []
+  responses:
+    '200':
+      description: Список настроек кодеков
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              codecs:
+                type: array
+                description: Список настроенных кодеков
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      description: Название кодека (PCMU, PCMA, G722, opus и т.д.)
+                    priority:
+                      type: integer
+                      description: Приоритет кодека (меньше = выше приоритет)
+          example:
+            codecs:
+              - name: "PCMU"
+                priority: 1
+              - name: "PCMA"
+                priority: 2
+              - name: "G722"
+                priority: 3
+    '400':
+      description: Ошибка запроса
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "Failed to get codec settings"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "internal server error"
+
+put:
+  summary: Обновить настройки аудио кодеков SIP
+  description: |
+    Обновляет список выбранных аудио кодеков и их приоритеты для SIP вызовов.
+
+    **Важно:**
+    - Кодеки должны быть из списка доступных (см. GET /api/intercom/sip/codecs/available)
+    - Приоритеты должны быть уникальными
+    - Изменения применяются после перезапуска SIP стека
+    - Рекомендуется настроить несколько кодеков для обеспечения совместимости
+  tags:
+    - Intercom
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - codecs
+          properties:
+            codecs:
+              type: array
+              description: Список кодеков с приоритетами
+              minItems: 1
+              items:
+                type: object
+                required:
+                  - name
+                  - priority
+                properties:
+                  name:
+                    type: string
+                    description: Название кодека
+                  priority:
+                    type: integer
+                    description: Приоритет (меньше = выше)
+                    minimum: 1
+        examples:
+          basic_setup:
+            summary: Базовая настройка (G.711)
+            description: Только стандартные кодеки G.711
+            value:
+              codecs:
+                - name: "PCMU"
+                  priority: 1
+                - name: "PCMA"
+                  priority: 2
+          wideband_setup:
+            summary: Широкополосная настройка
+            description: Приоритет на качественные кодеки
+            value:
+              codecs:
+                - name: "G722"
+                  priority: 1
+                - name: "PCMU"
+                  priority: 2
+                - name: "PCMA"
+                  priority: 3
+          modern_setup:
+            summary: Современная настройка
+            description: С поддержкой Opus для лучшего качества
+            value:
+              codecs:
+                - name: "opus"
+                  priority: 1
+                - name: "G722"
+                  priority: 2
+                - name: "PCMU"
+                  priority: 3
+  responses:
+    '200':
+      description: Настройки успешно обновлены
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+          example:
+            status: "ok"
+    '400':
+      description: Ошибка валидации данных
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          examples:
+            missing_field:
+              summary: Отсутствует обязательное поле
+              value:
+                error: "missing required field: codecs"
+            empty_list:
+              summary: Пустой список кодеков
+              value:
+                error: "codecs array cannot be empty"
+            invalid_codec:
+              summary: Неподдерживаемый кодек
+              value:
+                error: "invalid codec name: XYZ"
+            duplicate_priority:
+              summary: Дублирующиеся приоритеты
+              value:
+                error: "duplicate priority values not allowed"
+            missing_codec_field:
+              summary: Отсутствует поле в кодеке
+              value:
+                error: "codec object missing required field: priority"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "internal server error"

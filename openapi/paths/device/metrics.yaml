@@ -1,0 +1,9 @@
+get:
+  description: 'Этот запрос используется для получения метрик устройства
+    в формате OpenMetrics.'
+  responses:
+    '200':
+      description: OK
+  summary: Получить метрики
+  tags:
+  - Device

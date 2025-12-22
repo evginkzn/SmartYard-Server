@@ -1,0 +1,259 @@
+get:
+  summary: Получить список пользователей
+  description: Возвращает список всех пользователей устройства
+  tags:
+    - Device
+  security:
+    - basicAuth: []
+  responses:
+    '200':
+      description: Список пользователей получен успешно
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../../openapi.yaml#/components/schemas/UserResponse'
+          example:
+            - username: "admin"
+              accessLevel: "administrator"
+              token: "hashed_token_here"
+            - username: "operator1"
+              accessLevel: "operator"
+              token: "hashed_token_here"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "internal server error"
+
+put:
+  summary: Создать пользователя
+  description: Создает нового пользователя в системе
+  tags:
+    - Device
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../openapi.yaml#/components/schemas/User'
+        example:
+          username: "newuser"
+          password: "password123"
+          accessLevel: "user"
+  responses:
+    '200':
+      description: Пользователь создан успешно
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+          example:
+            status: "success"
+    '400':
+      description: Ошибка валидации данных
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          examples:
+            missing_username:
+              value:
+                error: "username must be non-empty string"
+            missing_password:
+              value:
+                error: "password must be non-empty string"
+            invalid_access_level:
+              value:
+                error: "accessLevel must be one of: admin, operator, user"
+            user_exists:
+              value:
+                error: "user with this username already exists"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "internal server error"
+
+patch:
+  summary: Изменить пользователя
+  description: Изменяет данные существующего пользователя
+  tags:
+    - Device
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../openapi.yaml#/components/schemas/UserUpdate'
+        example:
+          username: "existinguser"
+          password: "newpassword123"
+          accessLevel: "operator"
+  responses:
+    '200':
+      description: Пользователь изменен успешно
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+          example:
+            status: "success"
+    '400':
+      description: Ошибка валидации данных или прав доступа
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          examples:
+            missing_username:
+              value:
+                error: "username is required"
+            user_not_found:
+              value:
+                error: "target user not found"
+            access_denied:
+              value:
+                error: "access denied: only admin can change other users"
+            last_admin:
+              value:
+                error: "cannot remove last administrator privileges"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "internal server error"
+
+delete:
+  summary: Удалить пользователя
+  description: Удаляет пользователя из системы
+  tags:
+    - Device
+  security:
+    - basicAuth: []
+  parameters:
+    - name: username
+      in: query
+      required: true
+      schema:
+        type: string
+      description: Имя пользователя для удаления
+      example: "userToDelete"
+  responses:
+    '200':
+      description: Пользователь удален успешно
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+          example:
+            status: "success"
+    '400':
+      description: Ошибка валидации или невозможность удаления
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          examples:
+            user_not_found:
+              value:
+                error: "user not found"
+            last_admin:
+              value:
+                error: "cannot delete last administrator"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "internal server error"

@@ -1,0 +1,72 @@
+post:
+  security:
+    - basicAuth: []
+  description: |
+    Отправляет команду контроллеру (MCU) для обновления стандартных звуков на устройстве.
+
+    Этот эндпоинт используется после изменения конфигурации звуков в config-agent.json
+    для применения изменений на MCU через WebSocket соединение.
+
+    **Требования:**
+    - WebSocket соединение с MCU должно быть активно
+    - Аутентификация через Basic Auth или Bearer Token
+
+    **Примечание:** Эндпоинт не принимает тело запроса, только инициирует обновление.
+  responses:
+    '200':
+      description: Команда обновления успешно отправлена на MCU
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: ["ok"]
+                description: Статус выполнения операции
+              message:
+                type: string
+                description: Сообщение об успешной отправке команды
+            required: ["status", "message"]
+          example:
+            status: "ok"
+            message: "Standard sounds update triggered on MCU"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки аутентификации
+          example:
+            error: "authentication failed"
+    '503':
+      description: MCU не подключен, невозможно выполнить команду
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки подключения к MCU
+          example:
+            error: "MCU not connected - cannot trigger sound update"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание внутренней ошибки сервера
+          example:
+            error: "Failed to trigger sound update"
+  summary: Обновить стандартные звуки на MCU
+  tags:
+  - Intercom

@@ -1,0 +1,147 @@
+post:
+  description: |
+    Загружает SSL сертификат или приватный ключ для HTTPS соединения веб-сервера.
+
+    Этот эндпоинт загружает файлы по отдельности. Для полной настройки HTTPS необходимо:
+    1. Загрузить сертификат (type=cert)
+    2. Загрузить приватный ключ (type=key)
+
+    **Примечание безопасности:** Пути сохраненных файлов не возвращаются в ответе для предотвращения раскрытия структуры файловой системы.
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [cert, key]
+              description: "Тип загружаемого файла (cert - сертификат, key - приватный ключ)"
+            file:
+              type: string
+              format: binary
+              description: "Файл сертификата или приватного ключа в формате PEM"
+          required:
+            - type
+            - file
+  responses:
+    '200':
+      description: "Файл успешно загружен"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "ok"
+              message:
+                type: string
+                example: "Certificate uploaded successfully"
+              restart_required:
+                type: boolean
+                description: "Требуется ли перезапуск сервера для применения изменений"
+                example: true
+          example:
+            status: "ok"
+            message: "Certificate uploaded successfully"
+            restart_required: true
+    '400':
+      description: "Ошибка валидации или неверные параметры"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                examples:
+                  - "Certificate type required (cert or key)"
+                  - "Certificate file required"
+                  - "Invalid certificate type (must be 'cert' or 'key')"
+    '500':
+      description: "Внутренняя ошибка сервера"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Failed to save certificate: ..."
+  summary: Загрузить SSL сертификат или ключ для веб-сервера
+  tags:
+  - Device
+  security:
+    - basicAuth: []
+
+delete:
+  description: |
+    Удаляет установленный SSL сертификат или приватный ключ веб-сервера.
+
+    Позволяет удалить отдельно сертификат (type=cert) или приватный ключ (type=key).
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [cert, key]
+              description: "Тип удаляемого файла (cert - сертификат, key - приватный ключ)"
+          required:
+            - type
+        example:
+          type: "cert"
+  responses:
+    '200':
+      description: "Файл успешно удален"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "ok"
+              message:
+                type: string
+                example: "Certificate deleted successfully"
+              restart_required:
+                type: boolean
+                description: "Требуется ли перезапуск сервера для применения изменений"
+                example: true
+          example:
+            status: "ok"
+            message: "Certificate deleted successfully"
+            restart_required: true
+    '400':
+      description: "Ошибка валидации параметров"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                examples:
+                  - "Certificate type required (cert or key)"
+                  - "Invalid certificate type (must be 'cert' or 'key')"
+    '500':
+      description: "Ошибка удаления сертификата"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Failed to delete certificate: ..."
+  summary: Удалить SSL сертификат или ключ веб-сервера
+  tags:
+  - Device
+  security:
+    - basicAuth: []

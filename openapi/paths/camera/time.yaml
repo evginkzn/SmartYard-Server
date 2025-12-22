@@ -1,0 +1,91 @@
+get:
+  deprecated: true
+  summary: "[DEPRECATED] Получить настройки времени"
+  description: |
+    **⚠️ УСТАРЕЛО: Этот эндпоинт перенесён в раздел Device.**
+
+    Данный эндпоинт более не используется. Функциональность разделена на отдельные эндпоинты:
+
+    - **NTP настройки:** Используйте `/api/device/time/ntp` (GET/POST)
+    - **Часовой пояс:** Используйте `/api/device/time/timezone` (GET/POST)
+    - **Текущее время:** Используйте `/api/device/time/current` (GET)
+
+    Этот эндпоинт может быть удалён в будущих версиях API.
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              ntp_url:
+                type: string
+                description: URL NTP сервера
+              ntp_port:
+                type: number
+                description: Порт NTP сервера
+              timezone:
+                type: string
+                description: Часовой пояс
+              update_period:
+                type: number
+                description: Период обновления времени в секундах
+          example:
+            ntp_url: "pool.ntp.org"
+            ntp_port: 123
+            timezone: "Europe/Moscow"
+            update_period: 3600
+  tags:
+  - Camera
+post:
+  deprecated: true
+  summary: "[DEPRECATED] Изменить настройки времени"
+  description: |
+    **⚠️ УСТАРЕЛО: Этот эндпоинт перенесён в раздел Device.**
+
+    Данный эндпоинт более не используется. Функциональность разделена на отдельные эндпоинты:
+
+    - **NTP настройки:** Используйте `/api/device/time/ntp` (POST)
+    - **Часовой пояс:** Используйте `/api/device/time/timezone` (POST)
+
+    Этот эндпоинт может быть удалён в будущих версиях API.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            ntp_url:
+              type: string
+              description: URL NTP сервера
+            ntp_port:
+              type: number
+              description: Порт NTP сервера
+            timezone:
+              type: string
+              description: Часовой пояс
+            update_period:
+              type: number
+              description: Период обновления времени в секундах
+        example:
+          ntp_url: "pool.ntp.org"
+          ntp_port: 123
+          timezone: "Europe/Moscow"
+          update_period: 3600
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "ok"
+  tags:
+  - Camera

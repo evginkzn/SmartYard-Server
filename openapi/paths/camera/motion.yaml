@@ -1,0 +1,116 @@
+get:
+  description: "Возвращает настройки детекции движения"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              enabled:
+                type: boolean
+                description: Включена ли детекция движения
+              sensitivity:
+                type: number
+                description: Чувствительность детекции движения (1-100)
+              threshold:
+                type: number
+                description: Порог срабатывания детекции (1-100)
+              zones:
+                type: array
+                description: Зоны детекции движения
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: number
+                      description: Идентификатор зоны
+                    enabled:
+                      type: boolean
+                      description: Включена ли зона
+                    coordinates:
+                      type: array
+                      description: Координаты зоны в формате [x, y]
+                      items:
+                        type: array
+                        items:
+                          type: number
+          example:
+            enabled: true
+            sensitivity: 80
+            threshold: 50
+            zones: [
+              {
+                id: 1,
+                enabled: true,
+                coordinates: [[0,0], [100,0], [100,100], [0,100]]
+              }
+            ]
+  summary: Получить настройки детекции
+  tags:
+  - Camera
+post:
+  description: "Применяет новые настройки детекции движения"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+              description: Включить/выключить детекцию движения
+            sensitivity:
+              type: number
+              description: Чувствительность детекции движения (1-100)
+            threshold:
+              type: number
+              description: Порог срабатывания детекции (1-100)
+            zones:
+              type: array
+              description: Зоны детекции движения
+              items:
+                type: object
+                properties:
+                  id:
+                    type: number
+                    description: Идентификатор зоны
+                  enabled:
+                    type: boolean
+                    description: Включить/выключить зону
+                  coordinates:
+                    type: array
+                    description: Координаты зоны в формате [x, y]
+                    items:
+                      type: array
+                      items:
+                        type: number
+        example:
+          enabled: true
+          sensitivity: 80
+          threshold: 50
+          zones: [
+            {
+              id: 1,
+              enabled: true,
+              coordinates: [[0,0], [100,0], [100,100], [0,100]]
+            }
+          ]
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "ok"
+  summary: Изменить настройки детекции
+  tags:
+  - Camera

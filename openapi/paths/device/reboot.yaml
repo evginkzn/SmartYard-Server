@@ -1,0 +1,18 @@
+post:
+  description: "Перезагружает устройство"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "ok"
+  summary: Перезагрузить устройство
+  tags:
+  - Device

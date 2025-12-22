@@ -1,0 +1,56 @@
+post:
+  description: "Включает или выключает HTTPS режим на веб-сервере"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+              description: "Включить или выключить HTTPS"
+          required:
+            - enabled
+        example:
+          enabled: true
+  responses:
+    '200':
+      description: "HTTPS режим успешно изменен"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "ok"
+    '400':
+      description: "Ошибка валидации или отсутствие сертификата"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                examples:
+                  missing_parameter:
+                    value: "Missing required parameter: enabled"
+                  invalid_type:
+                    value: "Parameter 'enabled' must be boolean"
+                  no_certificate:
+                    value: "SSL certificate not found. Upload certificate first."
+    '500':
+      description: "Внутренняя ошибка сервера"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Failed to toggle HTTPS"
+  summary: Переключить HTTPS режим
+  tags:
+  - Device

@@ -1,0 +1,119 @@
+post:
+  summary: Изменить режим работы домофона
+  description: |
+    Переключает режим работы домофона между автономным (STANDALONE) и облачным (CLOUD) режимами.
+
+    **Режимы работы:**
+
+    - **STANDALONE** - Автономный режим
+      - Домофон работает независимо от облачного сервиса
+      - Все настройки хранятся локально
+      - Управление через локальный Web-интерфейс
+      - Не требует активации лицензии
+      - Подходит для локальных установок
+
+    - **CLOUD** - Облачный режим
+      - Домофон подключается к облачному сервису Спутник
+      - Централизованное управление через облачную панель
+      - Требуется активация лицензии (activationKey)
+      - Синхронизация настроек с облаком
+      - Удаленный доступ и мониторинг
+
+    **Примечание:** Изменение режима применяется немедленно. При переключении
+    на облачный режим убедитесь, что указан корректный ключ активации.
+  tags:
+    - Device
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - mode
+            - activationKey
+          properties:
+            mode:
+              type: string
+              enum: ["STANDALONE", "CLOUD"]
+              description: |
+                Режим работы домофона.
+                - `STANDALONE` - автономная работа без облачного сервиса
+                - `CLOUD` - работа с облачным сервисом Спутник
+            activationKey:
+              type: string
+              description: |
+                Ключ активации лицензии.
+
+                - Для **STANDALONE** режима можно указать пустую строку `""`
+                - Для **CLOUD** режима обязателен валидный ключ активации
+
+                Получить ключ можно в личном кабинете облачного сервиса Спутник.
+        examples:
+          standalone_mode:
+            summary: Переключить в автономный режим
+            value:
+              mode: "STANDALONE"
+              activationKey: ""
+          cloud_mode:
+            summary: Переключить в облачный режим
+            value:
+              mode: "CLOUD"
+              activationKey: "XXXX-XXXX-XXXX-XXXX"
+  responses:
+    '200':
+      description: Режим работы успешно изменен
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+              message:
+                type: string
+                description: Сообщение об успехе
+          example:
+            status: "ok"
+            message: "success"
+    '400':
+      description: Ошибка валидации или изменения режима
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            missing_mode:
+              summary: Отсутствует поле mode
+              value:
+                error: "[mode] cannot be empty and must be string."
+            invalid_mode:
+              summary: Некорректное значение mode
+              value:
+                error: "[mode] must be STANDALONE or CLOUD."
+            missing_activation_key:
+              summary: Отсутствует activationKey
+              value:
+                error: "[activationKey] cannot be empty and must be string."
+            save_failed:
+              summary: Ошибка сохранения конфигурации
+              value:
+                error: "Failed to save configuration: ..."
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"

@@ -1,0 +1,94 @@
+post:
+  description: "Загружает сертификаты для защищенного SIP. Сертификаты сохраняются в стандартные пути, управляемые приложением."
+  summary: Загрузить сертификат SIP (CA, клиентский сертификат или приватный ключ)
+  tags:
+  - Intercom
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          required:
+            - type
+            - file
+          properties:
+            type:
+              type: string
+              enum: [ca, cert, key]
+              description: |
+                Тип сертификата:
+                - ca: CA-сертификат (сохраняется в /etc/ssl/certs/sip-ca-cert.pem)
+                - cert: Клиентский сертификат (сохраняется в /etc/ssl/certs/sip-cert.pem)
+                - key: Приватный ключ (сохраняется в /etc/ssl/private/sip-key.pem)
+            file:
+              type: string
+              format: binary
+              description: Файл сертификата или приватного ключа в формате PEM
+        encoding:
+          file:
+            contentType: application/x-pem-file
+  responses:
+    '200':
+      description: Сертификат успешно загружен
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: ok
+              message:
+                type: string
+                example: Certificate uploaded successfully
+          example:
+            status: ok
+            message: Certificate uploaded successfully
+    '400':
+      description: Неверный запрос (невалидный сертификат, несовместимая пара ключ-сертификат и т.д.)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            invalidType:
+              summary: Неверный тип сертификата
+              value:
+                error: "Invalid certificate type. Must be 'ca', 'cert', or 'key'"
+            expiredCert:
+              summary: Сертификат истек
+              value:
+                error: "Certificate has expired: Certificate expired"
+            invalidFormat:
+              summary: Неверный формат
+              value:
+                error: "Invalid private key format"
+            keyMismatch:
+              summary: Ключ не соответствует сертификату
+              value:
+                error: "Certificate and private key do not match"
+            fileTooLarge:
+              summary: Файл слишком большой
+              value:
+                error: "Certificate file too large (max 1MB)"
+            emptyFile:
+              summary: Пустой файл
+              value:
+                error: "Certificate file is empty"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "Failed to write certificate file"

@@ -1,0 +1,82 @@
+post:
+  summary: Установить автоматический режим переключения день/ночь
+  description: |
+    Переключает камеру между ручным и автоматическим режимом работы.
+    В автоматическом режиме камера сама переключается между дневным и ночным режимом
+    на основе уровня освещённости.
+  tags:
+    - Camera
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - autoMode
+          properties:
+            autoMode:
+              type: boolean
+              description: true для автоматического режима, false для ручного
+        examples:
+          enable_auto:
+            summary: Включить автоматический режим
+            value:
+              autoMode: true
+          disable_auto:
+            summary: Выключить автоматический режим
+            value:
+              autoMode: false
+  responses:
+    '200':
+      description: Режим успешно изменён
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "success"
+    '400':
+      description: Ошибка валидации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          examples:
+            missing_field:
+              value:
+                error: "missing required field: autoMode"
+            invalid_type:
+              value:
+                error: "autoMode must be boolean"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "internal server error"

@@ -1,0 +1,8 @@
+get:
+  description: 'Этот запрос используется для получения логов устройства.'
+  responses:
+    '200':
+      description: OK
+  summary: Получить логи
+  tags:
+  - Device

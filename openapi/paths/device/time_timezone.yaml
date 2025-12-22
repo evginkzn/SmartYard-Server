@@ -1,0 +1,170 @@
+get:
+  summary: Получить текущий часовой пояс
+  description: |
+    Возвращает текущий настроенный часовой пояс устройства.
+
+    Поддерживаемые форматы часовых поясов:
+    - **UTC offset:** `UTC+03:00`, `GMT-05:00`, `UTC+05:30`
+    - **IANA timezone:** `Europe/Moscow`, `America/New_York`, `Asia/Tokyo`
+    - **POSIX:** `MSK-3`, `EST+5EDT,M3.2.0/2,M11.1.0/2`
+
+    **Примечание:** Значения UTC offset отображаются в привычной нотации
+    (восток = плюс, запад = минус), не в POSIX формате.
+  tags:
+    - Device
+  security:
+    - basicAuth: []
+  responses:
+    '200':
+      description: Часовой пояс успешно получен
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              timezone:
+                type: string
+                description: Текущий часовой пояс
+          examples:
+            utc_offset:
+              summary: UTC offset формат
+              value:
+                timezone: "UTC+03:00"
+            iana:
+              summary: IANA формат
+              value:
+                timezone: "Europe/Moscow"
+            posix:
+              summary: POSIX формат
+              value:
+                timezone: "MSK-3"
+    '400':
+      description: Ошибка при получении часового пояса
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "Failed to get timezone: ..."
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+
+post:
+  summary: Установить часовой пояс
+  description: |
+    Устанавливает часовой пояс устройства.
+
+    Поддерживаемые форматы:
+    - **UTC offset:** `UTC+03:00`, `GMT-05:00`, `UTC+05:30`
+    - **IANA timezone:** `Europe/Moscow`, `America/New_York`, `Asia/Tokyo`
+    - **POSIX:** `MSK-3`, `EST+5EDT,M3.2.0/2,M11.1.0/2`
+
+    **Рекомендуется использовать IANA формат** для автоматического учета перехода на
+    летнее/зимнее время.
+
+    **Примечание:** Изменения применяются немедленно и влияют на системное время,
+    метки времени в логах и OSD на видео.
+  tags:
+    - Device
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - timezone
+          properties:
+            timezone:
+              type: string
+              description: |
+                Часовой пояс в одном из поддерживаемых форматов.
+                Пустая строка не допускается.
+              minLength: 1
+        examples:
+          iana_moscow:
+            summary: Москва (IANA формат, рекомендуется)
+            value:
+              timezone: "Europe/Moscow"
+          utc_plus_three:
+            summary: UTC+3 (без DST)
+            value:
+              timezone: "UTC+03:00"
+          utc_new_york:
+            summary: Нью-Йорк
+            value:
+              timezone: "America/New_York"
+          utc_tokyo:
+            summary: Токио
+            value:
+              timezone: "Asia/Tokyo"
+          utc_minus_five:
+            summary: UTC-5
+            value:
+              timezone: "UTC-05:00"
+  responses:
+    '200':
+      description: Часовой пояс успешно установлен
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+              message:
+                type: string
+                description: Сообщение об успехе
+          example:
+            status: "ok"
+            message: "success"
+    '400':
+      description: Ошибка валидации или применения настроек
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            missing_timezone:
+              value:
+                error: "timezone must be string"
+            empty_timezone:
+              value:
+                error: "timezone cannot be empty"
+            invalid_format:
+              value:
+                error: "Invalid timezone format"
+            apply_failed:
+              value:
+                error: "Failed to set timezone: ..."
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"

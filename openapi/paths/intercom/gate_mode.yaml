@@ -1,0 +1,142 @@
+get:
+  description: "Получает текущий режим работы калитки"
+  security:
+    - basicAuth: []
+  responses:
+    '200':
+      description: Режим калитки получен успешно
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              gateMode:
+                type: boolean
+                description: Режим калитки (true - включен, false - выключен)
+          example:
+            gateMode: false
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки получения режима калитки
+          example:
+            error: "failed to read configuration"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки аутентификации
+          example:
+            error: "authentication failed"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание внутренней ошибки сервера
+          example:
+            error: "internal server error"
+  summary: Получить режим калитки
+  tags:
+  - Intercom
+post:
+  description: "Устанавливает режим работы калитки"
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - gateMode
+          properties:
+            gateMode:
+              type: boolean
+              description: Режим калитки (true - включить, false - выключить)
+        example:
+          gateMode: true
+  responses:
+    '200':
+      description: Режим калитки изменен успешно
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [success]
+                description: Настройки сохранены и применены
+              - type: object
+                properties:
+                  warning:
+                    type: string
+                    description: Предупреждение о том, что настройки сохранены, но не применены
+                description: Настройки сохранены, но не применены
+          examples:
+            success:
+              value:
+                status: "success"
+            warning:
+              value:
+                warning: "settings saved but not applied: WebSocket connection failed"
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки валидации
+                examples:
+                  - "invalid JSON format"
+                  - "[gateMode] cannot be empty and must be boolean."
+          example:
+            error: "[gateMode] cannot be empty and must be boolean."
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки аутентификации
+          example:
+            error: "authentication failed"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание внутренней ошибки сервера
+          example:
+            error: "internal server error"
+  summary: Изменить режим калитки
+  tags:
+  - Intercom

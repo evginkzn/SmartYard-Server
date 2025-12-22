@@ -1,0 +1,251 @@
+get:
+  description: |
+    Возвращает конфигурацию secure_keys для работы с защищенными ключами.
+    
+    Конфигурация определяет режим работы с ключами (COMMON, SL1, SL3) и параметры шифрования.
+  responses:
+    '200':
+      description: Успешный ответ с конфигурацией
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mode:
+                type: string
+                enum: ["COMMON", "SL1", "SL3"]
+                description: Режим работы с защищенными ключами
+              sectorNumber:
+                type: integer
+                nullable: true
+                minimum: 0
+                maximum: 255
+                description: Номер сектора для SL1/SL3 режимов
+              blockNumber:
+                type: integer
+                nullable: true
+                minimum: 0
+                maximum: 255
+                description: Номер блока для SL1/SL3 режимов
+              aKey:
+                type: string
+                nullable: true
+                description: Ключ A для шифрования (hex строка)
+              bKey:
+                type: string
+                nullable: true
+                description: Ключ B для шифрования (hex строка)
+              aesKey:
+                type: string
+                nullable: true
+                description: AES ключ для шифрования (hex строка)
+          examples:
+            common_mode:
+              summary: Конфигурация в режиме COMMON
+              value:
+                mode: "COMMON"
+                sectorNumber: null
+                blockNumber: null
+                aKey: null
+                bKey: null
+                aesKey: null
+            sl1_mode:
+              summary: Конфигурация в режиме SL1
+              value:
+                mode: "SL1"
+                sectorNumber: 8
+                blockNumber: 1
+                aKey: "FFFFFFFFFFFF"
+                bKey: "FFFFFFFFFFFF"
+                aesKey: null
+            sl3_mode:
+              summary: Конфигурация в режиме SL3
+              value:
+                mode: "SL3"
+                sectorNumber: 8
+                blockNumber: 1
+                aKey: null
+                bKey: null
+                aesKey: "00112233445566778899AABBCCDDEEFF"
+    '400':
+      description: Ошибка при получении конфигурации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '401':
+      description: Пользователь не авторизован
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+  summary: Получить конфигурацию secure_keys
+  tags:
+  - Intercom
+post:
+  description: |
+    Устанавливает новую конфигурацию secure_keys для работы с защищенными ключами.
+    
+    Полностью перезаписывает текущую конфигурацию. После успешного изменения 
+    конфигурация автоматически применяется к MCU через WebSocket.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - mode
+          properties:
+            mode:
+              type: string
+              description: Режим работы с защищенными ключами (принимается в любом регистре, будет приведен к верхнему)
+            sectorNumber:
+              type: integer
+              nullable: true
+              minimum: 0
+              maximum: 255
+              description: Номер сектора для SL1/SL3 режимов (обязателен для SL1/SL3)
+            blockNumber:
+              type: integer
+              nullable: true
+              minimum: 0
+              maximum: 255
+              description: Номер блока для SL1/SL3 режимов (обязателен для SL1/SL3)
+            aKey:
+              type: string
+              nullable: true
+              description: Ключ A для шифрования (hex строка, 12 символов для SL1)
+            bKey:
+              type: string
+              nullable: true
+              description: Ключ B для шифрования (hex строка, 12 символов для SL1)
+            aesKey:
+              type: string
+              nullable: true
+              description: AES ключ для шифрования (hex строка, 32 символа для SL3)
+        examples:
+          set_common_mode:
+            summary: Установить режим COMMON (регистр любой)
+            value:
+              mode: "common"
+              sectorNumber: null
+              blockNumber: null
+              aKey: null
+              bKey: null
+              aesKey: null
+          set_sl1_mode:
+            summary: Установить режим SL1 с ключами
+            value:
+              mode: "sl1"
+              sectorNumber: 8
+              blockNumber: 1
+              aKey: "FFFFFFFFFFFF"
+              bKey: "FFFFFFFFFFFF"
+              aesKey: null
+          set_sl3_mode:
+            summary: Установить режим SL3 с AES ключом
+            value:
+              mode: "sl3"
+              sectorNumber: 8
+              blockNumber: 1
+              aKey: null
+              bKey: null
+              aesKey: "00112233445566778899AABBCCDDEEFF"
+  responses:
+    '200':
+      description: Конфигурация успешно установлена
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  status:
+                    type: string
+                    enum: ["ok"]
+                  message:
+                    type: string
+                required: [status]
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    description: Предупреждение о том, что настройки сохранены, но конфигурация не применена
+                required: [error]
+          examples:
+            success:
+              summary: Успешное обновление конфигурации
+              value:
+                status: "ok"
+                message: "success"
+            warning:
+              summary: Настройки сохранены, но конфигурация не применена
+              value:
+                error: "update was successful, but the config was not applied due to: Connection timeout"
+    '400':
+      description: |
+        Ошибка в запросе:
+        - Неверный формат JSON
+        - Отсутствует обязательное поле mode
+        - Неверное значение mode (должно быть COMMON, SL1 или SL3, регистр не важен)
+        - Неверный тип данных для полей
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            invalid_mode:
+              summary: Неверное значение mode
+              value:
+                error: "mode must be one of: COMMON, SL1, SL3"
+            missing_mode:
+              summary: Отсутствует поле mode
+              value:
+                error: "mode field is required and must be a string"
+    '401':
+      description: Пользователь не авторизован
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+  summary: Установить конфигурацию secure_keys
+  tags:
+  - Intercom
+

@@ -1,0 +1,193 @@
+get:
+  description: "Возвращает сервисные настройки"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              webPort:
+                type: integer
+                description: Порт веб-сервиса (HTTP)
+              httpEnabled:
+                type: boolean
+                description: Включен ли HTTP сервер (опционально, по умолчанию true)
+                default: true
+              httpsEnabled:
+                type: boolean
+                description: Включен ли HTTPS сервер (опционально, по умолчанию false)
+                default: false
+              httpsPort:
+                type: integer
+                description: Порт HTTPS сервиса (опционально, по умолчанию 443)
+                default: 443
+              forceHttps:
+                type: boolean
+                description: Принудительное перенаправление HTTP на HTTPS (опционально, по умолчанию false)
+                default: false
+              hstsEnabled:
+                type: boolean
+                description: Включить заголовок HSTS (HTTP Strict Transport Security) (опционально, по умолчанию false)
+                default: false
+              hstsMaxAge:
+                type: integer
+                description: Максимальный возраст HSTS в секундах (опционально, по умолчанию 31536000)
+                default: 31536000
+              onvifEnable:
+                type: boolean
+                description: Включен ли ONVIF
+              serverMetricsUrl:
+                type: string
+                description: URL для метрик сервера
+              rtspAuth:
+                type: boolean
+                description: Включена ли RTSP аутентификация
+              rtspEnable:
+                type: boolean
+                description: Включен ли RTSP
+              rtspPort:
+                type: integer
+                description: Порт RTSP сервиса
+              upgradeServicePort:
+                type: integer
+                description: Порт сервиса обновлений
+              syslogServer:
+                type: string
+                description: Адрес сервера syslog
+              syslogPort:
+                type: integer
+                description: Порт сервера syslog
+              syslogLevel:
+                type: string
+                description: Уровень логирования syslog
+                enum: ["emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"]
+          example:
+            webPort: 80
+            httpEnabled: true
+            httpsEnabled: false
+            httpsPort: 443
+            forceHttps: false
+            hstsEnabled: false
+            hstsMaxAge: 31536000
+            onvifEnable: true
+            serverMetricsUrl: "http://metrics.example.com"
+            rtspAuth: true
+            rtspEnable: true
+            rtspPort: 554
+            upgradeServicePort: 81
+            syslogServer: "127.0.0.1"
+            syslogPort: 514
+            syslogLevel: "info"
+  summary: Получить сервисные настройки
+  tags:
+  - Device
+post:
+  description: "Применяет новые сервисные настройки"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - webPort
+            - rtspPort
+            - onvifEnable
+            - rtspEnable
+            - rtspAuth
+            - serverMetricsUrl
+            - syslogServer
+            - syslogPort
+            - syslogLevel
+            - upgradeServicePort
+          properties:
+            webPort:
+              type: integer
+              description: Порт веб-сервиса (HTTP)
+            httpEnabled:
+              type: boolean
+              description: Включить/выключить HTTP сервер (хотя бы один из HTTP/HTTPS должен быть включен). По умолчанию true
+              default: true
+            httpsEnabled:
+              type: boolean
+              description: Включить/выключить HTTPS сервер (хотя бы один из HTTP/HTTPS должен быть включен). По умолчанию false
+              default: false
+            httpsPort:
+              type: integer
+              description: Порт HTTPS сервиса. По умолчанию 443
+              default: 443
+            forceHttps:
+              type: boolean
+              description: Принудительное перенаправление HTTP на HTTPS. По умолчанию false
+              default: false
+            hstsEnabled:
+              type: boolean
+              description: Включить заголовок HSTS. По умолчанию false
+              default: false
+            hstsMaxAge:
+              type: integer
+              description: Максимальный возраст HSTS в секундах. По умолчанию 31536000
+              default: 31536000
+            onvifEnable:
+              type: boolean
+              description: Включить/выключить ONVIF
+            serverMetricsUrl:
+              type: string
+              description: URL для метрик сервера
+            rtspAuth:
+              type: boolean
+              description: Включить/выключить RTSP аутентификацию
+            rtspEnable:
+              type: boolean
+              description: Включить/выключить RTSP
+            rtspPort:
+              type: integer
+              description: Порт RTSP сервиса
+            upgradeServicePort:
+              type: integer
+              description: Порт сервиса обновлений
+            syslogServer:
+              type: string
+              description: Адрес сервера syslog
+            syslogPort:
+              type: integer
+              description: Порт сервера syslog
+            syslogLevel:
+              type: string
+              description: Уровень логирования syslog
+              enum: ["emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"]
+        example:
+          webPort: 80
+          httpEnabled: true
+          httpsEnabled: false
+          httpsPort: 443
+          forceHttps: false
+          hstsEnabled: false
+          hstsMaxAge: 31536000
+          onvifEnable: true
+          serverMetricsUrl: "http://metrics.example.com"
+          rtspAuth: true
+          rtspEnable: true
+          rtspPort: 554
+          upgradeServicePort: 81
+          syslogServer: "127.0.0.1"
+          syslogPort: 514
+          syslogLevel: "info"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "ok"
+  summary: Изменить сервисные настройки
+  tags:
+  - Device

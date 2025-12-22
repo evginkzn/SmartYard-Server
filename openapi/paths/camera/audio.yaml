@@ -1,0 +1,100 @@
+get:
+  security:
+    - basicAuth: []
+  description: 'Возвращает текущие настройки аудио канала'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: boolean
+                description: Состояние аудио канала
+              encodeType:
+                type: string
+                description: Тип кодирования аудио
+              sampleRate:
+                type: integer
+                description: Частота дискретизации аудио
+              bitrate:
+                type: integer
+                description: Битрейт аудио
+              inputVolume:
+                type: integer
+                description: Уровень входного звука
+              outputVolume:
+                type: integer
+                description: Уровень выходного звука
+              amplifier:
+                type: boolean
+                description: Состояние усилителя
+          example:
+            status: true
+            encodeType: "G711.A"
+            sampleRate: 8000
+            bitrate: 64000
+            inputVolume: 85
+            outputVolume: 85
+            amplifier: true
+  summary: Получить настройки аудио
+  tags:
+  - Camera
+post:
+  security:
+    - basicAuth: []
+  description: 'Применяет новые настройки аудио канала'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: boolean
+              description: Состояние аудио канала
+            encodeType:
+              type: string
+              description: Тип кодирования аудио
+            sampleRate:
+              type: integer
+              description: Частота дискретизации аудио
+            bitrate:
+              type: integer
+              description: Битрейт аудио
+            inputVolume:
+              type: integer
+              description: Уровень входного звука
+            outputVolume:
+              type: integer
+              description: Уровень выходного звука
+            amplifier:
+              type: boolean
+              description: Состояние усилителя
+        example:
+          status: true
+          encodeType: "G711.A"
+          sampleRate: 8000
+          bitrate: 64000
+          inputVolume: 70
+          outputVolume: 70
+          amplifier: false
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "ok"
+  summary: Изменить настройки аудио
+  tags:
+  - Camera

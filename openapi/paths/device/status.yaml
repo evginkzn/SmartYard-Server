@@ -1,0 +1,74 @@
+get:
+  description: "Возвращает информацию о состоянии устройства"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              hwVersion:
+                type: string
+                description: Версия аппаратной части домофона
+              swVersion:
+                type: string
+                description: Версия программной части домофона
+              bleVersion:
+                type: string
+                description: Версия BLE домофона
+              fwVersion:
+                type: string
+                description: Версия прошивки камеры
+              cpuLoad:
+                type: string
+                description: Текущая загрузка процессора
+              cpuTemp:
+                type: string
+                description: Температура процессора
+              mesaAgentVersion:
+                type: string
+                description: Версия Mesa агента
+              macAddr:
+                type: string
+                description: MAC-адрес устройства
+              localIP:
+                type: string
+                description: Локальный IP-адрес
+              licence:
+                type: string
+                description: Статус лицензии (ACTIVATED, DEACTIVATED, TRIAL, NONE)
+              intercomMode:
+                type: string
+                description: Режим работы домофона
+              serialCamera:
+                type: string
+                description: Серийный номер камеры
+              serialIntercom:
+                type: string
+                description: Серийный номер домофона
+              netRx:
+                type: string
+                description: Объем полученного трафика в KB
+              netTx:
+                type: string
+                description: Объем переданного трафика в KB
+          example:
+            hwVersion: "v1.0.0"
+            swVersion: "v2.1.0"
+            bleVersion: "v1.5.0"
+            fwVersion: "v5.1.0"
+            cpuLoad: "25"
+            cpuTemp: "45.5"
+            mesaAgentVersion: "v3.0.0"
+            macAddr: "00:11:22:33:44:55"
+            localIP: "192.168.1.100"
+            licence: "ACTIVATED"
+            intercomMode: "standard"
+            serialCamera: "CAM123456789"
+            serialIntercom: "INT987654321"
+            netRx: "1024"
+            netTx: "2048"
+  summary: Получить статус устройства
+  tags:
+  - Device

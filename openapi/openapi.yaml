@@ -1,0 +1,210 @@
+components:
+  parameters: {}
+  requestBodies: {}
+  responses: {}
+  schemas:
+    User:
+      type: object
+      required:
+        - username
+        - password
+        - accessLevel
+      properties:
+        username:
+          type: string
+          description: Имя пользователя
+          minLength: 1
+        password:
+          type: string
+          description: Пароль пользователя
+          minLength: 1
+        accessLevel:
+          type: string
+          description: Уровень доступа пользователя
+          enum: ["admin", "administrator", "operator", "user", "rtsp_only"]
+        token:
+          type: string
+          description: Токен аутентификации (только для чтения)
+          readOnly: true
+    UserResponse:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Имя пользователя
+        accessLevel:
+          type: string
+          description: Уровень доступа пользователя
+          enum: ["admin", "administrator", "operator", "user", "rtsp_only"]
+        token:
+          type: string
+          description: Токен аутентификации
+    UserUpdate:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Имя пользователя (обязательно для идентификации)
+        password:
+          type: string
+          description: Новый пароль (опционально)
+        accessLevel:
+          type: string
+          description: Новый уровень доступа (только для администраторов)
+          enum: ["admin", "administrator", "operator", "user", "rtsp_only"]
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: |
+        Используйте пару логин-пароль для базовой аутентификации.
+        
+        Дефолтные учетные данные:
+        - Логин: admin
+        - Пароль: adminpass
+info:
+  description: "# \U0001F4C4 Начало\n\n> **ВНИМАНИЕ! Эта документация находится на\
+    \ этапе активной разработки, мы постепенно будем обновлять данный документ до\
+    \ актуального состояния.** \n  \n\nДанная документация описывает взаимодействие\
+    \ с аппаратным API интерфейсом для домофона ** Спутник Гос / Тор ** с прошивкой\
+    \ камеры **5.1** и выше.\n\nКомпания оставляет право за собой изменять документацию,\
+    \ обновлять, дополнять или удалять методы, помечать как _depricated (устаревшее)_.\n\
+    \n## \U0001F516 Использование API\n\n- В Web-UI интерфейсе домофона, или через\
+    \ API запрос создайте пользователя через которого будете взаимодействовать (**ВАЖНО!\
+    \ От пользователя admin использовать API невозможно, это сделано в целях безопасности\
+    \ вашей инфраструктуры, поэтому необходимо создать нового пользователя)**\n  \
+    \  \n- Далее через Web-UI интерфейс домофона, или через API запрос сгенерируйте\
+    \ токен для прохождения аунтификации для использования других команд, так-же вы\
+    \ можете использовать Basic аунтификацию.\n    \n\n---\n\n## Authentication\n\n\
+    - Basic Auth: используйте пару логин-пароль для базовой аунтификации.\n    \n\
+    - Bearer Token: токен для аунтификации без передачи пары логин-пароль.\n    \n\
+    \n### Ошибка аунтификации\n\nЕсли API-токен будет недействителен или Basic аунтификация\
+    \ не удалась, вы получите ошибку **401 Unauthorized**"
+  title: Sputnik HW API
+  version: 2.0.0
+openapi: 3.0.0
+paths:
+  /config-agent.json:
+    $ref: './paths/config-agent.json.yaml'
+  /api/device/certificates/webserver:
+    $ref: './paths/device/certificates_webserver.yaml'
+  /api/device/webserver/certificates:
+    $ref: './paths/device/webserver_certificates.yaml'
+  /api/device/logs:
+    $ref: './paths/device/logs.yaml'
+  /api/device/logs/clear:
+    $ref: './paths/device/logs_clear.yaml'
+  /api/device/network:
+    $ref: './paths/device/network.yaml'
+  /api/device/reboot:
+    $ref: './paths/device/reboot.yaml'
+  /api/device/reset:
+    $ref: './paths/device/reset.yaml'
+  /api/device/status:
+    $ref: './paths/device/status.yaml'
+  /api/device/service:
+    $ref: './paths/device/service.yaml'
+  /api/device/standalone:
+    $ref: './paths/device/standalone.yaml'
+  /api/device/upgrade:
+    $ref: './paths/device/upgrade.yaml'
+  /api/device/upgrade_ota:
+    $ref: './paths/device/upgrade_ota.yaml'
+  /api/device/upgrade_mcu_fw:
+    $ref: './paths/device/upgrade_mcu_fw.yaml'
+  /api/device/upgrade_mcu_bl:
+    $ref: './paths/device/upgrade_mcu_bl.yaml'
+  /api/device/users:
+    $ref: './paths/device/users.yaml'
+  /api/device/time/ntp:
+    $ref: './paths/device/time_ntp.yaml'
+  /api/device/time/timezone:
+    $ref: './paths/device/time_timezone.yaml'
+  /api/device/time/current:
+    $ref: './paths/device/time_current.yaml'
+
+  /api/intercom/config:
+    $ref: './paths/intercom/config.yaml'
+  /api/intercom/audio:
+    $ref: './paths/intercom/audio.yaml'
+  /api/intercom/audio/update_standard_sounds:
+    $ref: './paths/intercom/audio_update_standard_sounds.yaml'
+  /api/intercom/calls:
+    $ref: './paths/intercom/calls.yaml'
+  /api/intercom/codes:
+    $ref: './paths/intercom/codes.yaml'
+  /api/intercom/door_settings:
+    $ref: './paths/intercom/door_settings.yaml'
+  /api/intercom/flats:
+    $ref: './paths/intercom/flats.yaml'
+  /api/intercom/gate:
+    $ref: './paths/intercom/gate.yaml'
+  /api/intercom/gate_mode:
+    $ref: './paths/intercom/gate_mode.yaml'
+  /api/intercom/keys:
+    $ref: './paths/intercom/keys.yaml'
+  /api/intercom/keys/config:
+    $ref: './paths/intercom/keys_config.yaml'
+  /api/intercom/keys/collect:
+    $ref: './paths/intercom/keys/collect.yaml'
+  /api/intercom/open_door:
+    $ref: './paths/intercom/open_door.yaml'
+  /api/intercom/open_second_door:
+    $ref: './paths/intercom/open_second_door.yaml'
+  /api/intercom/sip:
+    $ref: './paths/intercom/sip.yaml'
+  /api/intercom/sip/security:
+    $ref: './paths/intercom/sip_security.yaml'
+  /api/intercom/sip/certificates:
+    $ref: './paths/intercom/sip_certificates.yaml'
+  /api/intercom/sip/certificates/upload:
+    $ref: './paths/intercom/sip_certificates_upload.yaml'
+  /api/intercom/sip/codecs:
+    $ref: './paths/intercom/sip_codecs.yaml'
+  /api/intercom/sip/codecs/available:
+    $ref: './paths/intercom/sip_codecs_available.yaml'
+  /api/intercom/sos:
+    $ref: './paths/intercom/sos.yaml'
+  /api/intercom/test_call_analog:
+    $ref: './paths/intercom/test_call_analog.yaml'
+  /api/intercom/test_call_sip:
+    $ref: './paths/intercom/test_call_sip.yaml'
+  /api/intercom/test_line:
+    $ref: './paths/intercom/test_line.yaml'
+
+  /api/camera/audio:
+    $ref: './paths/camera/audio.yaml'
+  /api/camera/encode:
+    $ref: './paths/camera/encode.yaml'
+  /api/camera/image:
+    $ref: './paths/camera/image.yaml'
+  /api/camera/motion:
+    $ref: './paths/camera/motion.yaml'
+  /api/camera/osd:
+    $ref: './paths/camera/osd.yaml'
+  /api/camera/mode:
+    $ref: './paths/camera/mode/get.yaml'
+  /api/camera/mode/day:
+    $ref: './paths/camera/mode/day.yaml'
+  /api/camera/mode/night:
+    $ref: './paths/camera/mode/night.yaml'
+  /api/camera/mode/auto:
+    $ref: './paths/camera/mode/auto.yaml'
+  /api/camera/mode/ircut:
+    $ref: './paths/camera/mode/ircut.yaml'
+  /api/camera/snapshot.jpg:
+    $ref: './paths/camera/snapshot.jpg.yaml'
+
+tags:
+- description: Данный раздел описывает запросы к общим настройкам устройства
+  name: Device
+  x-displayName: "⚙️ Device"
+- description: Данный раздел описывает запросы к домофонной части устройства
+  name: Intercom
+  x-displayName: "🚪 Intercom"
+- description: Данный раздел описывает запросы к камере
+  name: Camera
+  x-displayName: "📹 Camera"
+
+security:
+  - basicAuth: []

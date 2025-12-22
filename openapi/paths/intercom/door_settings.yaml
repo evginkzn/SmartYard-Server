@@ -1,0 +1,231 @@
+get:
+  description: "Возвращает настройки двери домофона"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              doorModeNoNc:
+                type: integer
+                enum: [0, 1, 2, 3]
+                description: |
+                  Состояние управляющего вывода при закрытом состоянии дверей:
+                  - 0 (0x00) - Основная NC, Дополнительная NC
+                  - 1 (0x01) - Основная NO, Дополнительная NC  
+                  - 2 (0x02) - Основная NC, Дополнительная NO
+                  - 3 (0x03) - Основная NO, Дополнительная NO
+              enableWiegandGeneralDoor:
+                type: integer
+                enum: [0, 1]
+                description: |
+                  Выбор двери для открытия через внешний интерфейс:
+                  - 0 (0x00) - Дополнительная дверь
+                  - 1 (0x01) - Основная дверь
+              timeOpenDoor:
+                type: number
+                description: Время открытия основной двери в секундах
+              timeOpenDoorBle:
+                type: number
+                description: Время открытия двери через BLE в секундах
+              timeOpenDoorSocial:
+                type: number
+                description: Время открытия социальной двери в секундах
+              timeOpenDoorSos:
+                type: number
+                description: Время открытия двери по SOS в секундах
+              timeOpenAuxDoor:
+                type: number
+                description: Время открытия вспомогательной двери в секундах
+          example:
+            doorModeNoNc: 0
+            enableWiegandGeneralDoor: 1
+            timeOpenDoor: 5
+            timeOpenDoorBle: 5
+            timeOpenDoorSocial: 5
+            timeOpenDoorSos: 30
+            timeOpenAuxDoor: 5
+    '400':
+      description: Плохой запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "internal server error"
+    '401':
+      description: Не авторизован
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "unauthorized access"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "internal server error"
+  summary: Получить настройки двери
+  tags:
+  - Intercom
+post:
+  description: "Применяет новые настройки двери домофона"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - doorModeNoNc
+            - enableWiegandGeneralDoor
+            - timeOpenDoor
+            - timeOpenDoorBle
+            - timeOpenDoorSocial
+            - timeOpenDoorSos
+            - timeOpenAuxDoor
+          properties:
+            doorModeNoNc:
+              type: integer
+              enum: [0, 1, 2, 3]
+              description: |
+                Состояние управляющего вывода при закрытом состоянии дверей:
+                - 0 (0x00) - Основная NC, Дополнительная NC
+                - 1 (0x01) - Основная NO, Дополнительная NC  
+                - 2 (0x02) - Основная NC, Дополнительная NO
+                - 3 (0x03) - Основная NO, Дополнительная NO
+            enableWiegandGeneralDoor:
+              type: integer
+              enum: [0, 1]
+              description: |
+                Выбор двери для открытия через внешний интерфейс:
+                - 0 (0x00) - Дополнительная дверь
+                - 1 (0x01) - Основная дверь
+            timeOpenDoor:
+              type: integer
+              description: Время открытия основной двери в секундах (не более 259200 сек)
+            timeOpenDoorBle:
+              type: integer
+              description: Время открытия двери через BLE в секундах (не более 300 сек)
+            timeOpenDoorSocial:
+              type: integer
+              description: Время открытия социальной двери в секундах (не более 300 сек)
+            timeOpenDoorSos:
+              type: integer
+              description: Время открытия двери по SOS в секундах (не более 300 сек)
+            timeOpenAuxDoor:
+              type: integer
+              description: Время открытия вспомогательной двери в секундах
+        example:
+          doorModeNoNc: 0
+          enableWiegandGeneralDoor: 1
+          timeOpenDoor: 5
+          timeOpenDoorBle: 5
+          timeOpenDoorSocial: 5
+          timeOpenDoorSos: 30
+          timeOpenAuxDoor: 5
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  status:
+                    type: string
+                    description: Статус выполнения операции
+                example:
+                  status: "success"
+              - type: object
+                properties:
+                  warning:
+                    type: string
+                    description: Предупреждение о том, что настройки были сохранены, но не применены
+                example:
+                  warning: "settings saved but not applied: connection timeout"
+    '400':
+      description: Плохой запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            emptyBody:
+              value:
+                error: "request body is empty"
+              summary: Пустое тело запроса
+            invalidFormat:
+              value:
+                error: "invalid json format"
+              summary: Некорректный формат JSON
+            missingField:
+              value:
+                error: "missing required field: timeOpenDoor"
+              summary: Отсутствует обязательное поле
+            invalidType:
+              value:
+                error: "field 'doorModeNoNc' must be integer"
+              summary: Некорректный тип поля
+            rangeValidation:
+              value:
+                error: "bad arguments, [timeOpenDoor] no more - 259200 sec, [timeOpenDoorBle], [timeOpenDoorSocial], [timeOpenDoorSos] - no more 300 sec."
+              summary: Значение выходит за допустимый диапазон
+            invalidDoorMode:
+              value:
+                error: "bad arguments, [doorModeNoNc] must be 0, 1, 2, or 3 (0x00=NC/NC, 0x01=NO/NC, 0x02=NC/NO, 0x03=NO/NO)."
+              summary: Недопустимое значение режима двери
+            invalidInterfaceCtrl:
+              value:
+                error: "bad arguments, [enableWiegandGeneralDoor] must be 0 or 1 (0=auxiliary door, 1=main door)."
+              summary: Недопустимое значение управления интерфейсом
+    '401':
+      description: Не авторизован
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "unauthorized access"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "internal server error"
+  summary: Изменить настройки двери
+  tags:
+  - Intercom

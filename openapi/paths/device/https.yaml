@@ -1,0 +1,8 @@
+post:
+  description: ''
+  responses:
+    '200':
+      description: OK
+  summary: Загрузить TLS/SSL сертификат
+  tags:
+  - Device

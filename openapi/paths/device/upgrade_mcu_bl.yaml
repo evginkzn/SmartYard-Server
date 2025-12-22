@@ -1,0 +1,117 @@
+post:
+  summary: Обновить загрузчик MCU (bootloader)
+  description: |
+    Загружает и устанавливает загрузчик (bootloader) для микроконтроллера (MCU) домофона.
+
+    **Процесс обновления:**
+    1. Файл загрузчика загружается на устройство
+    2. Сохраняется в `/overlay/bootloader.bin`
+    3. Запускается процесс обновления bootloader MCU из внутреннего хранилища
+    4. MCU автоматически перезагружается с новым загрузчиком
+
+    **Требования к файлу:**
+    - Формат: бинарный файл загрузчика MCU (`.bin`)
+    - Размер: зависит от модели MCU (обычно до 128 KB)
+    - Должен быть совместим с установленным микроконтроллером
+
+    **⚠️ КРИТИЧЕСКИ ВАЖНО:**
+    - Загрузчик - это критически важный компонент MCU
+    - **Используйте ТОЛЬКО официальные файлы от производителя**
+    - Ошибка при обновлении загрузчика может "окирпичить" устройство
+    - Убедитесь в стабильности питания (желательно использовать ИБП)
+    - Процесс обновления может занять до 2 минут
+    - **НЕ ОТКЛЮЧАЙТЕ ПИТАНИЕ** до завершения обновления
+    - Рекомендуется обновлять загрузчик только при крайней необходимости
+
+    **Порядок обновления MCU:**
+    1. Сначала обновите загрузчик (этот эндпоинт)
+    2. Затем обновите прошивку через `/api/device/upgrade_mcu_fw`
+
+    **Примечание:** После успешной загрузки возвращается статус 204 (No Content).
+    Проверить статус обновления можно через `/api/device/status`.
+  tags:
+    - Device
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          required:
+            - file
+          properties:
+            file:
+              type: string
+              format: binary
+              description: |
+                Бинарный файл загрузчика MCU.
+                Файл должен иметь расширение `.bin` и быть совместим с установленным MCU.
+        encoding:
+          file:
+            contentType: application/octet-stream
+  responses:
+    '204':
+      description: |
+        Загрузчик успешно загружен и процесс обновления запущен.
+
+        Обновление выполняется асинхронно. MCU перезагрузится автоматически
+        после завершения обновления. Статус 204 означает, что запрос принят к обработке,
+        но содержимое ответа отсутствует.
+    '400':
+      description: Ошибка валидации или обработки файла
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            no_file:
+              summary: Файл не загружен
+              value:
+                error: "No file uploaded"
+            invalid_file:
+              summary: Некорректный файл загрузчика
+              value:
+                error: "Invalid bootloader file format"
+            upgrade_failed:
+              summary: Ошибка запуска обновления
+              value:
+                error: "Failed to upgrade MCU firmware: ..."
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+    '413':
+      description: Файл слишком большой
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "Payload too large"
+    '500':
+      description: Внутренняя ошибка сервера при сохранении файла
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "Failed to create/open file"

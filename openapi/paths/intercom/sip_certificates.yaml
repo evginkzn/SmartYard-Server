@@ -1,0 +1,111 @@
+get:
+  description: "Возвращает информацию о наличии сертификатов для защищенного SIP. Пути к файлам управляются приложением и не раскрываются из соображений безопасности."
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              tlsCaCertConfigured:
+                type: boolean
+                description: Установлен ли CA-сертификат по стандартному пути
+              tlsCaCertValid:
+                type: boolean
+                description: Действителен ли CA-сертификат
+              tlsCaCertSubject:
+                type: string
+                description: Subject CA-сертификата
+              tlsCaCertIssuer:
+                type: string
+                description: Issuer CA-сертификата
+              tlsCaCertNotBefore:
+                type: string
+                description: Дата начала действия CA-сертификата
+              tlsCaCertNotAfter:
+                type: string
+                description: Дата окончания действия CA-сертификата
+              tlsCaCertDaysUntilExpiry:
+                type: integer
+                description: Дней до истечения CA-сертификата
+              tlsCaCertError:
+                type: string
+                description: Ошибка CA-сертификата (если есть)
+              tlsCertConfigured:
+                type: boolean
+                description: Установлен ли клиентский сертификат по стандартному пути
+              tlsCertValid:
+                type: boolean
+                description: Действителен ли клиентский сертификат
+              tlsCertSubject:
+                type: string
+                description: Subject клиентского сертификата
+              tlsCertIssuer:
+                type: string
+                description: Issuer клиентского сертификата
+              tlsCertNotBefore:
+                type: string
+                description: Дата начала действия клиентского сертификата
+              tlsCertNotAfter:
+                type: string
+                description: Дата окончания действия клиентского сертификата
+              tlsCertDaysUntilExpiry:
+                type: integer
+                description: Дней до истечения клиентского сертификата
+              tlsCertError:
+                type: string
+                description: Ошибка клиентского сертификата (если есть)
+              tlsKeyConfigured:
+                type: boolean
+                description: Установлен ли приватный ключ по стандартному пути
+              tlsKeyPairValid:
+                type: boolean
+                description: Соответствует ли приватный ключ сертификату
+              tlsKeyPairError:
+                type: string
+                description: Ошибка проверки пары ключ-сертификат (если есть)
+          example:
+            tlsCaCertConfigured: true
+            tlsCaCertValid: true
+            tlsCaCertSubject: "/C=US/O=Example CA/CN=Example Root CA"
+            tlsCaCertIssuer: "/C=US/O=Example CA/CN=Example Root CA"
+            tlsCaCertNotBefore: "Jan 1 00:00:00 2024 GMT"
+            tlsCaCertNotAfter: "Dec 31 23:59:59 2034 GMT"
+            tlsCaCertDaysUntilExpiry: 3650
+            tlsCertConfigured: true
+            tlsCertValid: true
+            tlsCertSubject: "/C=US/O=Example/CN=sip.example.com"
+            tlsCertIssuer: "/C=US/O=Example CA/CN=Example Root CA"
+            tlsCertNotBefore: "Jan 1 00:00:00 2024 GMT"
+            tlsCertNotAfter: "Dec 31 23:59:59 2025 GMT"
+            tlsCertDaysUntilExpiry: 365
+            tlsKeyConfigured: true
+            tlsKeyPairValid: true
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "Failed to check certificate files"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "internal server error"
+  summary: Получить информацию о сертификатах SIP
+  tags:
+  - Intercom

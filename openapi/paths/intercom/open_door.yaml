@@ -1,0 +1,54 @@
+post:
+  description: "Открывает основную дверь домофона"
+  requestBody:
+    required: false
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            duration:
+              type: number
+              description: Время открытия двери в секундах (если не указано, используется значение по умолчанию 7 секунд)
+        example:
+          duration: 5
+  responses:
+    '200':
+      description: Дверь успешно открыта
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "ok"
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "invalid json format"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "internal server error"
+  summary: Открыть дверь
+  tags:
+  - Intercom

@@ -1,0 +1,55 @@
+post:
+  summary: Переключить камеру в ночной режим
+  description: |
+    Переключает камеру в ночной режим работы.
+    В ночном режиме включается IR-подсветка, IR-Cut фильтр закрыт (пропускает инфракрасный свет).
+  tags:
+    - Camera
+  security:
+    - basicAuth: []
+  responses:
+    '200':
+      description: Режим успешно изменён
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "ok"
+    '400':
+      description: Ошибка запроса
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "Failed to set night mode"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "internal server error"

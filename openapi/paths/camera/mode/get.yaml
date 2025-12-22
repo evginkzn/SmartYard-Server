@@ -1,0 +1,41 @@
+get:
+  description: "Получает текущую конфигурацию режима работы камеры"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mode:
+                type: string
+                enum: ["day", "night"]
+                description: "Текущий режим работы камеры"
+              modeAuto:
+                type: boolean
+                description: "Включён ли автоматический режим переключения"
+              ircutAuto:
+                type: boolean
+                description: "Включено ли автоматическое управление IR-Cut фильтром"
+          example:
+            mode: "day"
+            modeAuto: true
+            ircutAuto: true
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              message:
+                type: string
+          example:
+            status: "error"
+            message: "Failed to get mode config"
+  summary: Получить конфигурацию режима камеры
+  tags:
+  - Camera

@@ -1,0 +1,103 @@
+get:
+  description: Get current key collection mode
+  operationId: getApiIntercomKeysCollect
+  responses:
+    '200':
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [success]
+              currentMode:
+                type: string
+                enum: [auto_collect, with_flats_bind, engineer_collect, off]
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+  summary: Get key collection mode
+  tags:
+    - Intercom
+post:
+  description: Set key collection mode
+  operationId: postApiIntercomKeysCollect
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - mode
+          properties:
+            mode:
+              type: string
+              enum: [auto_collect, with_flats_bind, engineer_collect, off]
+              description: Key collection mode
+  responses:
+    '200':
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [success]
+              currentMode:
+                type: string
+                enum: [auto_collect, with_flats_bind, engineer_collect, off]
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+  summary: Set key collection mode
+  tags:
+    - Intercom

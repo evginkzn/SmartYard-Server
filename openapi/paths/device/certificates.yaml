@@ -1,0 +1,134 @@
+post:
+  description: "Загружает SSL сертификат и приватный ключ для HTTPS соединения"
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            certificate:
+              type: string
+              format: binary
+              description: "SSL сертификат в формате PEM"
+            private_key:
+              type: string
+              format: binary
+              description: "Приватный ключ в формате PEM"
+          required:
+            - certificate
+            - private_key
+  responses:
+    '200':
+      description: "Сертификат успешно загружен"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "ok"
+    '400':
+      description: "Ошибка валидации сертификата"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Invalid certificate format"
+    '500':
+      description: "Внутренняя ошибка сервера"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Failed to create certificate file"
+  summary: Загрузить SSL сертификат и ключ
+  tags:
+  - Device
+
+get:
+  description: "Возвращает статус текущего SSL сертификата"
+  responses:
+    '200':
+      description: "Статус сертификата получен успешно"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              httpsEnabled:
+                type: boolean
+                description: "Включен ли HTTPS"
+              certificateInstalled:
+                type: boolean
+                description: "Установлен ли сертификат"
+              validFrom:
+                type: string
+                description: "Дата начала действия сертификата"
+                example: "Jan  1 00:00:00 2024 GMT"
+              validTo:
+                type: string
+                description: "Дата окончания действия сертификата"
+                example: "Dec 31 23:59:59 2024 GMT"
+              subject:
+                type: string
+                description: "Субъект сертификата"
+                example: "CN=example.com, O=Company Ltd, C=US"
+              issuer:
+                type: string
+                description: "Издатель сертификата"
+                example: "CN=Certificate Authority, O=CA Ltd, C=US"
+          example:
+            httpsEnabled: false
+            certificateInstalled: true
+            validFrom: "Jan  1 00:00:00 2024 GMT"
+            validTo: "Dec 31 23:59:59 2024 GMT"
+            subject: "CN=device.local, O=Device Ltd, C=RU"
+            issuer: "CN=Device CA, O=Device Ltd, C=RU"
+    '500':
+      description: "Ошибка получения статуса сертификата"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Failed to get certificate status"
+  summary: Получить статус SSL сертификата
+  tags:
+  - Device
+
+delete:
+  description: "Удаляет установленный SSL сертификат и приватный ключ"
+  responses:
+    '200':
+      description: "Сертификат успешно удален"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "ok"
+    '500':
+      description: "Ошибка удаления сертификата"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Failed to remove certificate"
+  summary: Удалить SSL сертификат
+  tags:
+  - Device

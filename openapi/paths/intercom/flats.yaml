@@ -1,0 +1,630 @@
+get:
+  description: "Возвращает список квартир домофона"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              firstFlat:
+                type: number
+                description: Номер первой квартиры в списке
+              lastFlat:
+                type: number
+                description: Номер последней квартиры в списке
+              flatOffset:
+                type: number
+                description: Смещение списка квартир
+              totalCount:
+                type: number
+                description: Общее количество квартир
+              flats:
+                type: array
+                description: Список квартир
+                items:
+                  type: object
+                  properties:
+                    num:
+                      type: number
+                      description: Номер квартиры
+                    alias:
+                      type: string
+                      description: Псевдоним квартиры
+                    callVolume:
+                      type: number
+                      description: Громкость вызова
+                    sipAddress:
+                      type: string
+                      description: SIP-адрес квартиры
+                    sipEnable:
+                      type: boolean
+                      description: Включен ли SIP для квартиры
+                    analogEnable:
+                      type: boolean
+                      description: Включена ли аналоговая линия
+                    thresholdVoltageCall:
+                      type: number
+                      description: Пороговое напряжение для вызова
+                    thresholdVoltageDoor:
+                      type: number
+                      description: Пороговое напряжение для двери
+          example:
+            firstFlat: 1
+            lastFlat: 10
+            flatOffset: 0
+            totalCount: 100
+            flats: [
+              {
+                num: 1,
+                alias: "Квартира 1",
+                callVolume: 80,
+                sipAddress: "sip:1@example.com",
+                sipEnable: true,
+                analogEnable: true,
+                thresholdVoltageCall: 9.99,
+                thresholdVoltageDoor: 9.99
+              },
+              {
+                num: 2,
+                alias: "Квартира 2",
+                callVolume: 80,
+                sipAddress: "sip:2@example.com",
+                sipEnable: true,
+                analogEnable: true,
+                thresholdVoltageCall: 9.99,
+                thresholdVoltageDoor: 9.99
+              }
+            ]
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+  summary: Получить список квартир
+  tags:
+  - Intercom
+post:
+  description: "Добавляет новые квартиры в домофон"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            flats:
+              type: array
+              description: Список квартир для добавления
+              items:
+                type: object
+                required:
+                  - num
+                  - alias
+                  - callVolume
+                  - sipAddress
+                  - sipEnable
+                  - analogEnable
+                properties:
+                  num:
+                    type: number
+                    description: Номер квартиры
+                  alias:
+                    type: string
+                    description: Псевдоним квартиры
+                  callVolume:
+                    type: number
+                    description: Громкость вызова
+                  sipAddress:
+                    type: string
+                    description: SIP-адрес квартиры
+                  sipEnable:
+                    type: boolean
+                    description: Включить SIP для квартиры
+                  analogEnable:
+                    type: boolean
+                    description: Включить аналоговую линию
+                  thresholdVoltageCall:
+                    type: number
+                    description: Пороговое напряжение для вызова (по умолчанию 9.99)
+                  thresholdVoltageDoor:
+                    type: number
+                    description: Пороговое напряжение для двери (по умолчанию 9.99)
+        example: {
+          "flats": [
+            {
+              "num": 1,
+              "alias": "Квартира 1",
+              "callVolume": 80,
+              "sipAddress": "sip:1@example.com",
+              "sipEnable": true,
+              "analogEnable": true,
+              "thresholdVoltageCall": 9.99,
+              "thresholdVoltageDoor": 9.99
+            },
+            {
+              "num": 2,
+              "alias": "Квартира 2",
+              "callVolume": 80,
+              "sipAddress": "sip:2@example.com",
+              "sipEnable": true,
+              "analogEnable": true,
+              "thresholdVoltageCall": 9.99,
+              "thresholdVoltageDoor": 9.99
+            }
+          ]
+        }
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  status:
+                    type: string
+                    enum: ["ok"]
+                required: [status]
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    description: Предупреждение о том, что настройки сохранены, но конфигурация не применена
+                required: [error]
+          examples:
+            success:
+              summary: Успешное добавление квартир
+              value:
+                status: "ok"
+            warning:
+              summary: Настройки сохранены, но конфигурация не применена
+              value:
+                error: "update was successful, but the config was not applied due to: Connection timeout"
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            missing_fields:
+              summary: Пропущены обязательные поля
+              value:
+                error: "missing required field: callVolume"
+            invalid_values:
+              summary: Некорректные значения полей
+              value:
+                error: "[callVolume] cannot be empty. Cannot be less than 0 and greater than 100 and must be an integer."
+            flat_exists:
+              summary: Квартира уже существует
+              value:
+                error: "[num] such flat number already exists, use PATCH request to change flat or change number"
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+  summary: Добавить квартиры
+  tags:
+  - Intercom
+patch:
+  description: "Изменяет настройки существующих квартир"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            flats:
+              type: array
+              description: Список квартир для изменения
+              items:
+                type: object
+                required:
+                  - num
+                  - alias
+                  - callVolume
+                  - sipAddress
+                  - sipEnable
+                  - analogEnable
+                properties:
+                  num:
+                    type: number
+                    description: Номер квартиры
+                  alias:
+                    type: string
+                    description: Псевдоним квартиры
+                  callVolume:
+                    type: number
+                    description: Громкость вызова
+                  sipAddress:
+                    type: string
+                    description: SIP-адрес квартиры
+                  sipEnable:
+                    type: boolean
+                    description: Включить SIP для квартиры
+                  analogEnable:
+                    type: boolean
+                    description: Включить аналоговую линию
+                  thresholdVoltageCall:
+                    type: number
+                    description: Пороговое напряжение для вызова
+                  thresholdVoltageDoor:
+                    type: number
+                    description: Пороговое напряжение для двери
+        example: {
+          "flats": [
+            {
+              "num": 1,
+              "alias": "Квартира 1",
+              "callVolume": 80,
+              "sipAddress": "sip:1@example.com",
+              "sipEnable": true,
+              "analogEnable": true,
+              "thresholdVoltageCall": 9.99,
+              "thresholdVoltageDoor": 9.99
+            }
+          ]
+        }
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  status:
+                    type: string
+                    enum: ["ok"]
+                required: [status]
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    description: Предупреждение о том, что настройки сохранены, но конфигурация не применена
+                required: [error]
+          examples:
+            success:
+              summary: Успешное изменение квартир
+              value:
+                status: "ok"
+            warning:
+              summary: Настройки сохранены, но конфигурация не применена
+              value:
+                error: "update was successful, but the config was not applied due to: Connection timeout"
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            missing_fields:
+              summary: Пропущены обязательные поля
+              value:
+                error: "missing required field: sipAddress"
+            invalid_values:
+              summary: Некорректные значения полей
+              value:
+                error: "[sipAddress] must be in format '[sip:]number@domain.com[:port]' or '[sip:]number@ip_address[:port]' (example: sip:1@sip.example.com or 1@192.168.1.1)"
+            flat_not_found:
+              summary: Квартира не найдена
+              value:
+                error: "[num] no such flat number already exists, use POST request to create new flat"
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+  summary: Изменить квартиры
+  tags:
+  - Intercom
+delete:
+  description: "Удаляет квартиры из домофона"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            flats:
+              type: array
+              description: Список номеров квартир для удаления
+              items:
+                type: object
+                required:
+                  - num
+                properties:
+                  num:
+                    type: number
+                    description: Номер квартиры для удаления
+        example: {
+          "flats": [
+            {
+              "num": 1
+            },
+            {
+              "num": 2
+            }
+          ]
+        }
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  status:
+                    type: string
+                    enum: ["ok"]
+                required: [status]
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    description: Предупреждение о том, что настройки сохранены, но конфигурация не применена
+                required: [error]
+          examples:
+            success:
+              summary: Успешное удаление квартир
+              value:
+                status: "ok"
+            warning:
+              summary: Настройки сохранены, но конфигурация не применена
+              value:
+                error: "update was successful, but the config was not applied due to: Connection timeout"
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            missing_field:
+              summary: Пропущено обязательное поле
+              value:
+                error: "missing required field: num"
+            flat_not_found:
+              summary: Квартира не найдена
+              value:
+                error: "[num] no such flat number exists"
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+  summary: Удалить квартиры
+  tags:
+  - Intercom
+put:
+  description: "Создает новые квартиры или обновляет существующие (операция upsert). Если квартира с указанным номером существует, она будет обновлена. Если не существует, будет создана новая квартира."
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            flats:
+              type: array
+              description: Список квартир для создания или обновления
+              items:
+                type: object
+                required:
+                  - num
+                  - alias
+                  - callVolume
+                  - sipAddress
+                  - sipEnable
+                  - analogEnable
+                properties:
+                  num:
+                    type: number
+                    description: Номер квартиры
+                  alias:
+                    type: string
+                    description: Псевдоним квартиры
+                  callVolume:
+                    type: number
+                    description: Громкость вызова
+                  sipAddress:
+                    type: string
+                    description: SIP-адрес квартиры
+                  sipEnable:
+                    type: boolean
+                    description: Включить SIP для квартиры
+                  analogEnable:
+                    type: boolean
+                    description: Включить аналоговую линию
+                  thresholdVoltageCall:
+                    type: number
+                    description: Пороговое напряжение для вызова (по умолчанию 9.99)
+                  thresholdVoltageDoor:
+                    type: number
+                    description: Пороговое напряжение для двери (по умолчанию 9.99)
+        example: {
+          "flats": [
+            {
+              "num": 1,
+              "alias": "Квартира 1",
+              "callVolume": 80,
+              "sipAddress": "sip:1@example.com",
+              "sipEnable": true,
+              "analogEnable": true,
+              "thresholdVoltageCall": 9.99,
+              "thresholdVoltageDoor": 9.99
+            },
+            {
+              "num": 2,
+              "alias": "Квартира 2",
+              "callVolume": 80,
+              "sipAddress": "sip:2@example.com",
+              "sipEnable": true,
+              "analogEnable": true,
+              "thresholdVoltageCall": 9.99,
+              "thresholdVoltageDoor": 9.99
+            }
+          ]
+        }
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  status:
+                    type: string
+                    enum: ["ok"]
+                required: [status]
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    description: Предупреждение о том, что настройки сохранены, но конфигурация не применена
+                required: [error]
+          examples:
+            success:
+              summary: Успешное создание/обновление квартир
+              value:
+                status: "ok"
+            warning:
+              summary: Настройки сохранены, но конфигурация не применена
+              value:
+                error: "update was successful, but the config was not applied due to: Connection timeout"
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            missing_fields:
+              summary: Пропущены обязательные поля
+              value:
+                error: "missing required field: callVolume"
+            invalid_values:
+              summary: Некорректные значения полей
+              value:
+                error: "[callVolume] cannot be empty. Cannot be less than 0 and greater than 100 and must be an integer."
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+  summary: Создать или обновить квартиры
+  tags:
+  - Intercom

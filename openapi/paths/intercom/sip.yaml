@@ -1,0 +1,186 @@
+get:
+  description: "Возвращает настройки SIP домофона"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              sipServer:
+                type: string
+                description: Адрес SIP-сервера
+              sipPort:
+                type: number
+                description: Порт SIP-сервера
+              sipLogin:
+                type: string
+                description: Логин для SIP-сервера
+              sipUsername:
+                type: string
+                description: Имя пользователя для SIP-аутентификации
+              sipPassword:
+                type: string
+                description: Пароль для SIP-аутентификации
+              callTimeout:
+                type: number
+                description: Таймаут звонка в секундах
+              dropAnalogCall:
+                type: boolean
+                description: Отключать ли аналоговый звонок при SIP-звонке
+              dtmfTag:
+                type: string
+                description: DTMF-тег для сигнализации
+              sosButtonUrl:
+                type: string
+                description: URL для кнопки SOS
+              registrationStatus:
+                type: string
+                description: Статус регистрации SIP-аккаунта
+          example:
+            sipServer: "sip.example.com"
+            sipPort: 5060
+            sipLogin: "intercom"
+            sipUsername: "intercom"
+            sipPassword: "password"
+            callTimeout: 30
+            dropAnalogCall: true
+            dtmfTag: "1234"
+            sosButtonUrl: "sos@sip.example.com:5440"
+            registrationStatus: "Registered"
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "Failed to read configuration"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "internal server error"
+  summary: Получить настройки SIP
+  tags:
+  - Intercom
+post:
+  description: "Применяет новые настройки SIP домофона"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - sipServer
+            - sipLogin
+            - sipPassword
+            - sipUsername
+            - dtmfTag
+            - dropAnalogCall
+            - sosButtonUrl
+            - sipPort
+            - callTimeout
+          properties:
+            sipServer:
+              type: string
+              description: Адрес SIP-сервера (доменное имя или IP-адрес)
+            sipPort:
+              type: number
+              description: Порт SIP-сервера (1-65535)
+            sipLogin:
+              type: string
+              description: Логин для SIP-сервера
+            sipUsername:
+              type: string
+              description: Имя пользователя для SIP-аутентификации
+            sipPassword:
+              type: string
+              description: Пароль для SIP-аутентификации
+            callTimeout:
+              type: number
+              description: Таймаут звонка в секундах (1-300)
+            dropAnalogCall:
+              type: boolean
+              description: Отключать ли аналоговый звонок при SIP-звонке
+            dtmfTag:
+              type: string
+              description: DTMF-тег для сигнализации
+            sosButtonUrl:
+              type: string
+              description: URL для кнопки SOS
+        example:
+          sipServer: "sip.example.com"
+          sipPort: 5060
+          sipLogin: "intercom"
+          sipUsername: "intercom"
+          sipPassword: "password"
+          callTimeout: 30
+          dropAnalogCall: true
+          dtmfTag: "1234"
+          sosButtonUrl: "sos@sip.example.com:5440"
+  responses:
+    '200':
+      description: Настройки успешно обновлены
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+            example:
+              status: "ok"
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+            example:
+              error: "missing required field: sipServer"
+    '401':
+      description: Не авторизован
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+            example:
+              error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+            example:
+              error: "internal server error"
+  summary: Изменить настройки SIP
+  tags:
+  - Intercom

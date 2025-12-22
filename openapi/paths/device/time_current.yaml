@@ -1,0 +1,102 @@
+get:
+  summary: Получить текущее время системы
+  description: |
+    Возвращает текущее системное время устройства в различных форматах,
+    а также информацию о часовом поясе и состоянии NTP синхронизации.
+
+    Этот эндпоинт полезен для:
+    - Проверки точности системного времени
+    - Диагностики проблем с синхронизацией времени
+    - Получения текущего времени в ISO 8601 формате для логирования
+    - Проверки статуса NTP
+
+    **Примечание:** Время возвращается в текущем часовом поясе устройства.
+  tags:
+    - Device
+  security:
+    - basicAuth: []
+  responses:
+    '200':
+      description: Текущее время успешно получено
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              systemTime:
+                type: string
+                format: date-time
+                description: Текущее время в ISO 8601 формате (YYYY-MM-DDTHH:mm:ss.sssZ)
+              epochMs:
+                type: integer
+                format: int64
+                description: Текущее время в миллисекундах с начала эпохи Unix (1970-01-01)
+              timezone:
+                type: string
+                description: Текущий часовой пояс устройства
+              ntp:
+                type: object
+                description: Информация о NTP синхронизации
+                properties:
+                  enabled:
+                    type: boolean
+                    description: Включена ли синхронизация времени по NTP
+                  servers:
+                    type: array
+                    description: Список NTP серверов
+                    items:
+                      type: string
+          examples:
+            with_ntp:
+              summary: С включенной NTP синхронизацией
+              value:
+                systemTime: "2025-10-20T15:30:45.123Z"
+                epochMs: 1729437045123
+                timezone: "Europe/Moscow"
+                ntp:
+                  enabled: true
+                  servers:
+                    - "pool.ntp.org"
+                    - "time.google.com"
+            without_ntp:
+              summary: Без NTP синхронизации
+              value:
+                systemTime: "2025-10-20T12:30:45.456Z"
+                epochMs: 1729426245456
+                timezone: "UTC"
+                ntp:
+                  enabled: false
+                  servers: []
+            utc_timezone:
+              summary: UTC часовой пояс
+              value:
+                systemTime: "2025-10-20T12:30:45.789Z"
+                epochMs: 1729426245789
+                timezone: "UTC"
+                ntp:
+                  enabled: true
+                  servers:
+                    - "time.cloudflare.com"
+    '400':
+      description: Ошибка при получении текущего времени
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "Failed to get current time: ..."
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"

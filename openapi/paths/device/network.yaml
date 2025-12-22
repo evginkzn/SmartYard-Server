@@ -1,0 +1,200 @@
+get:
+  summary: Получить сетевые настройки
+  description: |
+    Возвращает текущие сетевые настройки устройства.
+
+    **Примечание:** После изменения сетевых настроек устройство может быть
+    недоступно на старом IP-адресе. Подключитесь к новому IP-адресу.
+  tags:
+    - Device
+  security:
+    - basicAuth: []
+  responses:
+    '200':
+      description: Успешный ответ с сетевыми настройками
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              ip:
+                type: string
+                description: IP-адрес устройства
+                example: "192.168.1.100"
+              gateway:
+                type: string
+                description: IP-адрес шлюза
+                example: "192.168.1.1"
+              mask:
+                type: string
+                description: Маска подсети
+                example: "255.255.255.0"
+              dns1:
+                type: string
+                description: Первичный DNS-сервер
+                example: "8.8.8.8"
+              dns2:
+                type: string
+                description: Вторичный DNS-сервер
+                example: "8.8.4.4"
+          example:
+            ip: "192.168.1.100"
+            gateway: "192.168.1.1"
+            mask: "255.255.255.0"
+            dns1: "8.8.8.8"
+            dns2: "8.8.4.4"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "Failed to get network settings"
+
+post:
+  summary: Изменить сетевые настройки
+  description: |
+    Применяет новые сетевые настройки устройства.
+
+    **ВАЖНО:**
+    - После применения настроек устройство будет доступно на новом IP-адресе
+    - Убедитесь, что новый IP-адрес не конфликтует с другими устройствами в сети
+    - Рекомендуется проверить доступность шлюза перед применением
+    - Изменения применяются немедленно, текущее соединение может быть потеряно
+  tags:
+    - Device
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - ip
+            - gateway
+            - mask
+          properties:
+            ip:
+              type: string
+              description: IP-адрес устройства в формате xxx.xxx.xxx.xxx
+              pattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+            gateway:
+              type: string
+              description: IP-адрес шлюза
+              pattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+            mask:
+              type: string
+              description: Маска подсети
+              pattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+            dns1:
+              type: string
+              description: Первичный DNS-сервер (опционально)
+              pattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+            dns2:
+              type: string
+              description: Вторичный DNS-сервер (опционально)
+              pattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+        examples:
+          standard_network:
+            summary: Стандартная домашняя сеть
+            description: Типичная настройка для домашней сети 192.168.1.x
+            value:
+              ip: "192.168.1.100"
+              gateway: "192.168.1.1"
+              mask: "255.255.255.0"
+              dns1: "8.8.8.8"
+              dns2: "8.8.4.4"
+          corporate_network:
+            summary: Корпоративная сеть
+            description: Настройка для корпоративной сети с подсетью /24
+            value:
+              ip: "10.20.30.150"
+              gateway: "10.20.30.1"
+              mask: "255.255.255.0"
+              dns1: "10.20.30.10"
+              dns2: "10.20.30.11"
+          minimal_config:
+            summary: Минимальная конфигурация
+            description: Только обязательные параметры без DNS
+            value:
+              ip: "192.168.1.100"
+              gateway: "192.168.1.1"
+              mask: "255.255.255.0"
+  responses:
+    '200':
+      description: Настройки успешно применены
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "ok"
+    '400':
+      description: Ошибка валидации данных
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          examples:
+            missing_field:
+              summary: Отсутствует обязательное поле
+              value:
+                error: "missing required field: ip"
+            invalid_ip:
+              summary: Неверный формат IP-адреса
+              value:
+                error: "invalid IP address format"
+            invalid_mask:
+              summary: Неверная маска подсети
+              value:
+                error: "invalid subnet mask"
+            network_conflict:
+              summary: Конфликт сетевых настроек
+              value:
+                error: "IP address and gateway must be in the same subnet"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "Failed to apply network settings"

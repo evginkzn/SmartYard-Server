@@ -1,0 +1,46 @@
+post:
+  description: "Переключает камеру между ручным и автоматическим режимом работы"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            auto_mode:
+              type: boolean
+              description: "true для автоматического режима, false для ручного"
+          required:
+            - auto_mode
+        example:
+          auto_mode: true
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "success"
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              message:
+                type: string
+          example:
+            status: "error"
+            message: "auto_mode must be boolean"
+  summary: Установить режим управления камерой
+  tags:
+  - Camera

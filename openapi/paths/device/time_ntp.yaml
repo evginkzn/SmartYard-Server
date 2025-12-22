@@ -1,0 +1,165 @@
+get:
+  summary: Получить настройки NTP
+  description: |
+    Возвращает текущие настройки синхронизации времени по протоколу NTP (Network Time Protocol).
+
+    Эндпоинт заменяет устаревший `/api/camera/time` для управления NTP.
+  tags:
+    - Device
+  security:
+    - basicAuth: []
+  responses:
+    '200':
+      description: Настройки NTP успешно получены
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              enabled:
+                type: boolean
+                description: Включена ли синхронизация времени по NTP
+              servers:
+                type: array
+                description: Список NTP серверов для синхронизации
+                items:
+                  type: string
+                  description: URL или IP адрес NTP сервера
+          examples:
+            enabled:
+              summary: NTP включен
+              value:
+                enabled: true
+                servers:
+                  - "pool.ntp.org"
+                  - "time.google.com"
+            disabled:
+              summary: NTP отключен
+              value:
+                enabled: false
+                servers: []
+    '400':
+      description: Ошибка при получении настроек NTP
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "Failed to get NTP settings: ..."
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+
+post:
+  summary: Изменить настройки NTP
+  description: |
+    Устанавливает новые настройки синхронизации времени по протоколу NTP.
+
+    Позволяет включить/отключить NTP и настроить список серверов для синхронизации времени.
+
+    **Примечание:** Изменения применяются немедленно. При включенном NTP устройство
+    автоматически синхронизирует время с указанными серверами.
+  tags:
+    - Device
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - enabled
+          properties:
+            enabled:
+              type: boolean
+              description: Включить или отключить синхронизацию времени по NTP
+            servers:
+              type: array
+              description: |
+                Список NTP серверов для синхронизации (необязательно, но рекомендуется если enabled=true).
+                Можно указать доменные имена или IP адреса.
+              items:
+                type: string
+                description: URL или IP адрес NTP сервера
+        examples:
+          enable_ntp:
+            summary: Включить NTP с публичными серверами
+            value:
+              enabled: true
+              servers:
+                - "pool.ntp.org"
+                - "time.google.com"
+                - "time.cloudflare.com"
+          disable_ntp:
+            summary: Отключить NTP
+            value:
+              enabled: false
+              servers: []
+          custom_server:
+            summary: Использовать локальный NTP сервер
+            value:
+              enabled: true
+              servers:
+                - "192.168.1.1"
+  responses:
+    '200':
+      description: Настройки NTP успешно применены
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+              message:
+                type: string
+                description: Сообщение об успехе
+          example:
+            status: "ok"
+            message: "success"
+    '400':
+      description: Ошибка валидации или применения настроек
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            missing_enabled:
+              value:
+                error: "enabled must be boolean"
+            invalid_servers:
+              value:
+                error: "servers must be array of strings"
+            apply_failed:
+              value:
+                error: "Failed to set NTP settings: ..."
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"

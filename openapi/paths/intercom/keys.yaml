@@ -1,0 +1,586 @@
+delete:
+  description: "Удаляет ключи из конфигурации. Можно удалить конкретные ключи (передав массив keys в теле запроса) или все ключи сразу (используя параметр ?all=true)"
+  parameters:
+    - name: all
+      in: query
+      description: "Если true или 1, удаляет все ключи (тело запроса игнорируется)"
+      required: false
+      schema:
+        type: string
+        enum: ["true", "1"]
+        example: "true"
+  requestBody:
+    required: false
+    description: "Обязательно только если не используется параметр ?all=true"
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - keys
+          properties:
+            keys:
+              type: array
+              items:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    type: string
+                    description: Идентификатор ключа
+  responses:
+    '200':
+      description: Ключи успешно удалены
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  status:
+                    type: string
+                    enum: ["ok"]
+                required: [status]
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    description: Предупреждение о том, что настройки сохранены, но конфигурация не применена
+                required: [error]
+          examples:
+            success:
+              summary: Успешное удаление ключей
+              value:
+                status: "ok"
+            warning:
+              summary: Настройки сохранены, но конфигурация не применена
+              value:
+                error: "update was successful, but the config was not applied due to: Connection timeout"
+    '400':
+      description: |
+        Ошибка в запросе:
+        - Неверный формат JSON
+        - Отсутствует массив ключей
+        - Отсутствует идентификатор ключа
+        - Указанные ключи не найдены
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '401':
+      description: Пользователь не авторизован
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+  summary: Удалить ключи
+  tags:
+  - Intercom
+get:
+  description: |
+    Возвращает список всех ключей из конфигурации.
+    
+    Поддерживает фильтрацию по номеру квартиры через query параметры.
+    Без параметров возвращает все ключи (включая неназначенные).
+  parameters:
+    - name: flat
+      in: query
+      description: Номер квартиры для фильтрации ключей
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+      example: 15
+    - name: flats
+      in: query
+      description: Список номеров квартир через запятую для фильтрации ключей (имеет приоритет над параметром flat)
+      required: false
+      schema:
+        type: string
+        pattern: '^[1-9][0-9]*(?:,[1-9][0-9]*)*$'
+      example: "15,16,17"
+  responses:
+    '200':
+      description: Успешный ответ
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              keys:
+                type: object
+                properties:
+                  totalCount:
+                    type: integer
+                    description: Общее количество ключей
+                  edges:
+                    type: array
+                    description: Массив ключей
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Идентификатор ключа
+                        description:
+                          type: string
+                          description: Описание ключа
+                        secretId:
+                          type: string
+                          description: Секретный идентификатор
+                        isFrozen:
+                          type: boolean
+                          description: Заморожен ли ключ
+                        flatNumber:
+                          type: integer
+                          nullable: true
+                          minimum: 1
+                          description: Номер квартиры, которой принадлежит ключ (null для неназначенных ключей)
+          examples:
+            all_keys:
+              summary: Все ключи (без фильтрации)
+              value:
+                keys:
+                  totalCount: 3
+                  edges:
+                    - id: "0a40d8e4"
+                      description: "Ключ квартиры 5"
+                      secretId: null
+                      isFrozen: false
+                      flatNumber: 5
+                    - id: "1b51e9f5"
+                      description: "Мастер ключ"
+                      secretId: "secret123"
+                      isFrozen: false
+                      flatNumber: null
+                    - id: "2c62faf6"
+                      description: "Ключ квартиры 15"
+                      secretId: null
+                      isFrozen: true
+                      flatNumber: 15
+            filtered_keys:
+              summary: Ключи квартиры 15 (?flat=15)
+              value:
+                keys:
+                  totalCount: 1
+                  edges:
+                    - id: "2c62faf6"
+                      description: "Ключ квартиры 15"
+                      secretId: null
+                      isFrozen: true
+                      flatNumber: 15
+    '400':
+      description: Ошибка при получении ключей
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '401':
+      description: Пользователь не авторизован
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+  summary: Получить список ключей
+  tags:
+  - Intercom
+patch:
+  description: |
+    Изменяет существующие ключи в конфигурации.
+    
+    Тело запроса должно содержать массив ключей с их идентификаторами и новыми значениями.
+    Можно изменить назначение квартиры через поле flatNumber (null для снятия назначения).
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - keys
+          properties:
+            keys:
+              type: array
+              items:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    type: string
+                    description: Идентификатор ключа
+                  description:
+                    type: string
+                    description: Новое описание ключа
+                  secretId:
+                    type: string
+                    description: Новый секретный идентификатор
+                  isFrozen:
+                    type: boolean
+                    description: Новое состояние заморозки ключа
+                  flatNumber:
+                    type: integer
+                    nullable: true
+                    minimum: 1
+                    description: Новый номер квартиры для ключа (null для снятия назначения)
+        examples:
+          change_flat_assignment:
+            summary: Изменение назначений квартир для ключей
+            value:
+              keys:
+                - id: "0a40d8e4"
+                  flatNumber: 16
+                - id: "1b51e9f5"
+                  description: "Обновленное описание"
+                  flatNumber: null
+                - id: "2c62faf6"
+                  isFrozen: false
+                  flatNumber: 25
+  responses:
+    '200':
+      description: Ключи успешно изменены
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  status:
+                    type: string
+                    enum: ["ok"]
+                required: [status]
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    description: Предупреждение о том, что настройки сохранены, но конфигурация не применена
+                required: [error]
+          examples:
+            success:
+              summary: Успешное изменение ключей
+              value:
+                status: "ok"
+            warning:
+              summary: Настройки сохранены, но конфигурация не применена
+              value:
+                error: "update was successful, but the config was not applied due to: Connection timeout"
+    '400':
+      description: |
+        Ошибка в запросе:
+        - Неверный формат JSON
+        - Отсутствует массив ключей
+        - Отсутствует идентификатор ключа
+        - Указанные ключи не найдены
+        - Некорректный номер квартиры (должен быть положительным числом или null)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '401':
+      description: Пользователь не авторизован
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+  summary: Изменить / Настроить ключ
+  tags:
+  - Intercom
+post:
+  description: |
+    Добавляет новые ключи в конфигурацию.
+    
+    Тело запроса должно содержать массив новых ключей.
+    Можно указать номер квартиры для ключа через поле flatNumber.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - keys
+          properties:
+            keys:
+              type: array
+              items:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    type: string
+                    description: Идентификатор ключа
+                  description:
+                    type: string
+                    description: Описание ключа
+                  secretId:
+                    type: string
+                    description: Секретный идентификатор
+                  isFrozen:
+                    type: boolean
+                    description: Состояние заморозки ключа
+                  flatNumber:
+                    type: integer
+                    nullable: true
+                    minimum: 1
+                    description: Номер квартиры, которой принадлежит ключ (null для неназначенного ключа)
+        examples:
+          new_keys:
+            summary: Добавление ключей с назначением квартир
+            value:
+              keys:
+                - id: "3d73gbg7"
+                  description: "Новый ключ квартиры 8"
+                  secretId: "secret456"
+                  isFrozen: false
+                  flatNumber: 8
+                - id: "4e84hch8"
+                  description: "Гостевой ключ"
+                  secretId: null
+                  isFrozen: false
+                  flatNumber: null
+  responses:
+    '200':
+      description: Ключи успешно добавлены
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  status:
+                    type: string
+                    enum: ["ok"]
+                required: [status]
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    description: Предупреждение о том, что настройки сохранены, но конфигурация не применена
+                required: [error]
+          examples:
+            success:
+              summary: Успешное добавление ключей
+              value:
+                status: "ok"
+            warning:
+              summary: Настройки сохранены, но конфигурация не применена
+              value:
+                error: "update was successful, but the config was not applied due to: Connection timeout"
+    '400':
+      description: |
+        Ошибка в запросе:
+        - Неверный формат JSON
+        - Отсутствует массив ключей
+        - Отсутствует идентификатор ключа
+        - Дублирующиеся идентификаторы ключей
+        - Ключ с таким идентификатором уже существует
+        - Некорректный номер квартиры (должен быть положительным числом или null)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '401':
+      description: Пользователь не авторизован
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+  summary: Добавить ключи
+  tags:
+  - Intercom
+put:
+  description: "Создает новые ключи или обновляет существующие (операция upsert). Если ключ с указанным id существует, он будет обновлен. Если не существует, будет создан новый ключ."
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            keys:
+              type: array
+              description: Список ключей для создания или обновления
+              items:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    type: string
+                    description: Уникальный идентификатор ключа
+                  description:
+                    type: string
+                    description: Описание ключа
+                  secretId:
+                    type: string
+                    nullable: true
+                    description: Secret ID ключа (может быть null)
+                  isFrozen:
+                    type: boolean
+                    description: Заблокирован ли ключ (по умолчанию false)
+                  flatNumber:
+                    type: integer
+                    nullable: true
+                    description: Номер квартиры, к которой привязан ключ (может быть null)
+        example: {
+          "keys": [
+            {
+              "id": "AABBCCDD",
+              "description": "Ключ владельца 1",
+              "secretId": "12345678",
+              "isFrozen": false,
+              "flatNumber": 101
+            },
+            {
+              "id": "11223344",
+              "description": "Ключ владельца 2",
+              "secretId": null,
+              "isFrozen": false,
+              "flatNumber": 102
+            }
+          ]
+        }
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  status:
+                    type: string
+                    enum: ["ok"]
+                required: [status]
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    description: Предупреждение о том, что настройки сохранены, но конфигурация не применена
+                required: [error]
+          examples:
+            success:
+              summary: Успешное создание/обновление ключей
+              value:
+                status: "ok"
+            warning:
+              summary: Настройки сохранены, но конфигурация не применена
+              value:
+                error: "update was successful, but the config was not applied due to: Connection timeout"
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            missing_id:
+              summary: Отсутствует обязательное поле id
+              value:
+                error: "each key must have a valid non-empty 'id' string"
+            invalid_values:
+              summary: Некорректные значения полей
+              value:
+                error: "flat number must be positive integer or null"
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+  summary: Создать или обновить ключи
+  tags:
+  - Intercom

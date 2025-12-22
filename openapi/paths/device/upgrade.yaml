@@ -1,0 +1,185 @@
+options:
+  description: "Возвращает заголовки CORS для междоменных запросов"
+  responses:
+    '200':
+      description: OK
+      headers:
+        Access-Control-Allow-Origin:
+          description: Разрешенные домены
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          description: Разрешенные HTTP методы
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          description: Разрешенные заголовки
+          schema:
+            type: string
+        Access-Control-Max-Age:
+          description: Время кеширования preflight запроса
+          schema:
+            type: integer
+  summary: CORS Preflight
+  tags:
+  - Device
+
+post:
+  description: |
+    Загружает файл прошивки на устройство и запускает процесс обновления.
+
+    **ВАЖНО**: Данный эндпоинт работает на отдельном HTTP сервере на порту, который настраивается через `/api/device/service` в поле `upgradeServicePort` (по умолчанию 81).
+
+  security:
+    - basicAuth: []
+
+  parameters:
+    - name: X-Firmware-SHA256
+      in: header
+      required: true
+      description: SHA256 хеш файла прошивки для проверки целостности (64 шестнадцатеричных символа)
+      schema:
+        type: string
+        pattern: '^[a-fA-F0-9]{64}$'
+        example: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            firmware:
+              type: string
+              format: binary
+              description: Файл прошивки для обновления устройства
+            file:
+              type: string
+              format: binary
+              description: Альтернативное имя поля для файла прошивки
+          required:
+            - firmware
+        encoding:
+          firmware:
+            contentType: application/octet-stream
+  
+  responses:
+    '200':
+      description: Прошивка успешно загружена и процесс обновления запущен
+      headers:
+        Access-Control-Allow-Origin:
+          description: CORS заголовок
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          description: Разрешенные HTTP методы
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          description: Разрешенные заголовки
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус операции
+            example:
+              status: "ok"
+    
+    '400':
+      description: Некорректный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            bad_request:
+              value:
+                error: "Bad Request"
+            invalid_content_length:
+              value:
+                error: "Bad Request - Invalid Content-Length"
+            missing_sha256:
+              value:
+                error: "Bad Request - Missing X-Firmware-SHA256 header"
+            invalid_sha256_format:
+              value:
+                error: "Bad Request - Invalid SHA256 format"
+    
+    '401':
+      description: Неавторизованный доступ
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "Unauthorized"
+    
+    '404':
+      description: Эндпоинт не найден
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "Not Found"
+    
+    '413':
+      description: Файл слишком большой (превышает 50 МБ)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "Payload Too Large"
+
+    '422':
+      description: Ошибка валидации прошивки (неверный формат файла или не совпал SHA256)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "Unprocessable Entity - Firmware validation failed"
+
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "Internal Server Error"
+
+  summary: Обновление прошивки устройства
+  tags:
+  - Device

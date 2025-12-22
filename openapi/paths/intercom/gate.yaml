@@ -1,0 +1,197 @@
+get:
+  summary: Получить настройки калитки
+  description: "Получает настройки домов и подъездов для системы калитки"
+  tags:
+    - Intercom
+  security:
+    - basicAuth: []
+  responses:
+    '200':
+      description: Настройки калитки получены успешно
+      content:
+        application/json:
+          schema:
+            type: array
+            description: Массив домов с их подъездами
+            items:
+              type: object
+              properties:
+                num:
+                  type: integer
+                  description: Номер дома
+                entrances:
+                  type: array
+                  description: Массив подъездов
+                  items:
+                    type: object
+                    properties:
+                      address:
+                        type: string
+                        description: SIP-адрес подъезда в формате [sip:]username@domain[:port]
+                      firstFlat:
+                        type: integer
+                        description: Номер первой квартиры в подъезде
+                      lastFlat:
+                        type: integer
+                        description: Номер последней квартиры в подъезде
+                    required:
+                      - address
+                      - firstFlat
+                      - lastFlat
+              required:
+                - num
+                - entrances
+          example:
+            - num: 1
+              entrances:
+                - address: "sip:1@SIP.thirdparty.sputnik.systems:5440"
+                  firstFlat: 1
+                  lastFlat: 20
+            - num: 2
+              entrances:
+                - address: "sip:2@SIP.thirdparty.sputnik.systems:5440"
+                  firstFlat: 21
+                  lastFlat: 40
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки получения настроек калитки
+          example:
+            error: "failed to read configuration"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки аутентификации
+          example:
+            error: "authentication failed"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание внутренней ошибки сервера
+          example:
+            error: "internal server error"
+
+post:
+  summary: Изменить настройки калитки
+  description: "Устанавливает настройки домов и подъездов для системы калитки"
+  tags:
+    - Intercom
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: array
+          description: Массив домов с их подъездами
+          minItems: 1
+          items:
+            type: object
+            properties:
+              num:
+                type: integer
+                description: Номер дома
+              entrances:
+                type: array
+                description: Массив подъездов
+                minItems: 1
+                items:
+                  type: object
+                  properties:
+                    address:
+                      type: string
+                      description: SIP-адрес подъезда в формате [sip:]username@domain[:port]
+                      pattern: '^(?:sip:)?[a-zA-Z0-9._%+-]+@(?:([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}|(\d{1,3}\.){3}\d{1,3})(:\d+)?$'
+                    firstFlat:
+                      type: integer
+                      description: Номер первой квартиры в подъезде
+                    lastFlat:
+                      type: integer
+                      description: Номер последней квартиры в подъезде
+                  required:
+                    - address
+                    - firstFlat
+                    - lastFlat
+            required:
+              - num
+              - entrances
+        example:
+          - num: 1
+            entrances:
+              - address: "sip:1@SIP.thirdparty.sputnik.systems:5440"
+                firstFlat: 1
+                lastFlat: 20
+          - num: 2
+            entrances:
+              - address: "sip:2@SIP.thirdparty.sputnik.systems:5440"
+                firstFlat: 21
+                lastFlat: 40
+  responses:
+    '200':
+      description: Настройки калитки изменены успешно
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [success]
+                description: Статус выполнения операции
+          example:
+            status: "success"
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки валидации
+          example:
+            error: "[address] wrong format, should be [sip:]username@domain[:port]"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки аутентификации
+          example:
+            error: "authentication failed"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание внутренней ошибки сервера
+          example:
+            error: "internal server error"

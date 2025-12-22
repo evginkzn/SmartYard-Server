@@ -1,0 +1,64 @@
+get:
+  description: |
+    Возвращает информацию о текущем SSL сертификате веб-сервера.
+
+    Этот эндпоинт позволяет:
+    - Проверить наличие файла сертификата
+    - Проверить наличие файла приватного ключа
+    - Проверить, включен ли HTTPS
+
+    **Примечание безопасности:** Пути к файлам не возвращаются для предотвращения раскрытия структуры файловой системы.
+  responses:
+    '200':
+      description: "Информация о сертификате получена успешно"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              certExists:
+                type: boolean
+                description: "Существует ли файл сертификата"
+              keyExists:
+                type: boolean
+                description: "Существует ли файл приватного ключа"
+              httpsEnabled:
+                type: boolean
+                description: "Включен ли HTTPS"
+              configured:
+                type: boolean
+                description: "Настроен ли раздел service в конфигурации (возвращается только если false)"
+          examples:
+            with_certificate:
+              summary: "С установленным сертификатом"
+              value:
+                certExists: true
+                keyExists: true
+                httpsEnabled: true
+            without_certificate:
+              summary: "Без сертификата"
+              value:
+                certExists: false
+                keyExists: false
+                httpsEnabled: false
+            not_configured:
+              summary: "Не настроен раздел конфигурации"
+              value:
+                configured: false
+                certExists: false
+                keyExists: false
+    '500':
+      description: "Ошибка получения информации о сертификате"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Failed to get certificate info: ..."
+  summary: Получить информацию о SSL сертификате веб-сервера
+  tags:
+  - Device
+  security:
+    - basicAuth: []

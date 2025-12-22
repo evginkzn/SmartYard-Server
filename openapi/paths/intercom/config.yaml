@@ -1,0 +1,252 @@
+get:
+  summary: Получить полную конфигурацию домофона
+  description: |
+    Возвращает полную конфигурацию домофонной части устройства.
+
+    Включает все настройки:
+    - **Audio** - громкость микрофона, динамика, SIP
+    - **SIP** - настройки SIP сервера, регистрация
+    - **Flats** - список квартир с SIP адресами
+    - **Keys** - RFID ключи доступа
+    - **Digital Keys** - цифровые коды доступа
+    - **Calls** - настройки звонков и таймауты
+    - **Door** - настройки открытия дверей
+    - **Gate** - настройки шлагбаума
+    - **SOS** - настройки кнопки экстренного вызова
+
+    Этот эндпоинт возвращает только секцию `intercom` из полной конфигурации устройства.
+    Для получения всей конфигурации используйте `/config-agent.json`.
+  tags:
+    - Intercom
+  security:
+    - basicAuth: []
+  responses:
+    '200':
+      description: Конфигурация домофона успешно получена
+      content:
+        application/json:
+          schema:
+            type: object
+            description: Полная структура конфигурации домофона
+          example:
+            intercom:
+              config:
+                audio:
+                  general: 80
+                  speakHandsetTx: 70
+                  speakLoudspeaker: 75
+                  speakSIP: 70
+                  listenHandsetRx: 80
+                  listenLoudspeaker: 85
+                  listenSIP: 75
+                  ringVolume: 90
+                  ringTone: 1
+                sip:
+                  sipServer: "sip.example.com"
+                  sipPort: 5060
+                  sipUsername: "100"
+                  sipPassword: "secret"
+                  sipDomain: "example.com"
+                  sipRegister: true
+                  sipEnable: true
+                calls:
+                  callsTimeout: 30
+                  callsRetryCount: 3
+                door:
+                  doorOpenDuration: 5
+                  doorOpenMode: "pulse"
+                sos:
+                  sosButtonEnabled: true
+                  sosButtonTimeout: 30
+                  sosButtonNumber: "112"
+                flats:
+                  - num: 1
+                    alias: "Квартира 1"
+                    sipAddress: "sip:101@sip.example.com"
+                    sipEnable: true
+                keys: []
+                digitalKeys: []
+                gateMode: "disabled"
+                gate:
+                  enabled: false
+    '400':
+      description: Ошибка при получении конфигурации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "Failed to get full config: ..."
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+
+post:
+  summary: Изменить конфигурацию домофона
+  description: |
+    Применяет изменения к конфигурации домофона.
+
+    **Принцип работы:**
+    - Можно передать полную конфигурацию или только изменяемые поля
+    - Поддерживается частичное обновление (merge) - передавайте только те поля, которые нужно изменить
+    - Вложенные объекты также обновляются частично
+    - Все значения валидируются перед применением
+
+    **Валидация полей:**
+
+    **Audio (1-100):**
+    - `general` - общая громкость (1-100)
+    - `speakHandsetTx`, `speakLoudspeaker`, `speakSIP` - громкость передачи (1-100)
+    - `listenHandsetRx`, `listenLoudspeaker`, `listenSIP` - громкость приема (1-100)
+    - `ringVolume`, `ringTone` - громкость и мелодия звонка (1-100)
+
+    **Door:**
+    - `doorOpenDuration` - длительность открытия двери в секундах (1-30)
+    - `doorOpenMode` - режим открытия: `"pulse"` (импульс) или `"hold"` (удержание)
+
+    **SIP:**
+    - `sipServer`, `sipUsername`, `sipPassword`, `sipDomain` - строки
+    - `sipPort` - порт SIP сервера (1-65535)
+    - `sipRegister`, `sipEnable` - булевы значения
+
+    **Calls:**
+    - `callsTimeout`, `callsRetryCount` - таймаут и повторы звонков (1-10)
+
+    **SOS:**
+    - `sosButtonEnabled` - включена ли кнопка SOS (boolean)
+    - `sosButtonTimeout` - таймаут SOS в секундах (1-60)
+    - `sosButtonNumber` - номер для экстренного вызова (string)
+
+    **Collections:**
+    - `flats` - массив квартир
+    - `keys` - массив RFID ключей
+    - `digitalKeys` - массив цифровых кодов
+
+    **Gate:**
+    - `gateMode` - режим шлагбаума: `"disabled"`, `"enabled"`, `"auto"`
+    - `gate` - объект настроек шлагбаума
+
+    **Примечание:** Изменения применяются немедленно и сохраняются в конфигурации.
+  tags:
+    - Intercom
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          description: |
+            Частичная или полная конфигурация домофона.
+            Можно передать только изменяемые поля.
+        examples:
+          partial_audio:
+            summary: Изменить только громкость
+            value:
+              intercom:
+                config:
+                  audio:
+                    general: 85
+                    speakLoudspeaker: 80
+          partial_sip:
+            summary: Обновить настройки SIP
+            value:
+              intercom:
+                config:
+                  sip:
+                    sipServer: "new-sip.example.com"
+                    sipPort: 5060
+                    sipUsername: "200"
+          partial_door:
+            summary: Изменить настройки двери
+            value:
+              intercom:
+                config:
+                  door:
+                    doorOpenDuration: 7
+                    doorOpenMode: "pulse"
+          full_config:
+            summary: Полная конфигурация
+            value:
+              intercom:
+                config:
+                  audio:
+                    general: 80
+                    speakHandsetTx: 70
+                    speakLoudspeaker: 75
+                    speakSIP: 70
+                  sip:
+                    sipServer: "sip.example.com"
+                    sipPort: 5060
+                    sipUsername: "100"
+                    sipEnable: true
+                  calls:
+                    callsTimeout: 30
+                    callsRetryCount: 3
+                  door:
+                    doorOpenDuration: 5
+                    doorOpenMode: "pulse"
+  responses:
+    '200':
+      description: Конфигурация успешно обновлена
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "ok"
+    '400':
+      description: Ошибка валидации или применения конфигурации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            invalid_value:
+              summary: Некорректное значение поля
+              value:
+                error: "Invalid value for key: general"
+            out_of_range:
+              summary: Значение вне допустимого диапазона
+              value:
+                error: "Value must be between 1 and 100"
+            invalid_type:
+              summary: Неверный тип данных
+              value:
+                error: "Expected boolean, got string"
+            save_failed:
+              summary: Ошибка сохранения
+              value:
+                error: "Failed to change full config: ..."
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"

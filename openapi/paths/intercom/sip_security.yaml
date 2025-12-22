@@ -1,0 +1,174 @@
+get:
+  description: "Возвращает настройки безопасности SIP (TLS/SRTP)"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              useTls:
+                type: boolean
+                description: Использовать TLS для шифрования SIP-сигнализации
+              tlsPort:
+                type: number
+                description: Порт для TLS-соединения (обычно 5061)
+                minimum: 1
+                maximum: 65535
+              tlsCaCertConfigured:
+                type: boolean
+                description: Установлен ли CA-сертификат
+              tlsCertConfigured:
+                type: boolean
+                description: Установлен ли клиентский сертификат
+              tlsKeyConfigured:
+                type: boolean
+                description: Установлен ли приватный ключ
+              tlsVerifyServer:
+                type: boolean
+                description: Проверять ли сертификат сервера
+              tlsVerifyClient:
+                type: boolean
+                description: Требовать ли клиентский сертификат
+              srtpMode:
+                type: number
+                description: "Режим SRTP для шифрования медиа: 0 = отключено, 1 = опционально, 2 = обязательно"
+                enum: [0, 1, 2]
+              allowedIps:
+                type: array
+                items:
+                  type: string
+                description: Список разрешенных IP-адресов для SIP-соединений
+          example:
+            useTls: true
+            tlsPort: 5061
+            tlsCaCertConfigured: true
+            tlsCertConfigured: true
+            tlsKeyConfigured: true
+            tlsVerifyServer: true
+            tlsVerifyClient: false
+            srtpMode: 2
+            allowedIps: ["192.168.1.100", "10.0.0.5"]
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "SIP security configuration not found"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "internal server error"
+  summary: Получить настройки безопасности SIP
+  tags:
+  - Intercom
+put:
+  description: "Обновляет настройки безопасности SIP (TLS/SRTP). Сертификаты управляются приложением по фиксированным путям."
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            useTls:
+              type: boolean
+              description: Использовать TLS для шифрования SIP-сигнализации
+            tlsPort:
+              type: number
+              description: Порт для TLS-соединения (1-65535, обычно 5061)
+              minimum: 1
+              maximum: 65535
+            tlsVerifyServer:
+              type: boolean
+              description: Проверять ли сертификат сервера
+            tlsVerifyClient:
+              type: boolean
+              description: Требовать ли клиентский сертификат от сервера
+            srtpMode:
+              type: number
+              description: "Режим SRTP: 0 = отключено, 1 = опционально, 2 = обязательно"
+              enum: [0, 1, 2]
+            allowedIps:
+              type: array
+              items:
+                type: string
+              description: Список разрешенных IP-адресов для SIP-соединений
+        example:
+          useTls: true
+          tlsPort: 5061
+          tlsVerifyServer: true
+          tlsVerifyClient: false
+          srtpMode: 2
+          allowedIps: ["192.168.1.100"]
+  responses:
+    '200':
+      description: Настройки безопасности успешно обновлены
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+              message:
+                type: string
+                description: Сообщение о результате
+          example:
+            status: "ok"
+            message: "SIP security settings updated successfully"
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "srtpMode must be 0, 1, or 2"
+    '401':
+      description: Не авторизован
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "internal server error"
+  summary: Обновить настройки безопасности SIP
+  tags:
+  - Intercom

@@ -1,0 +1,135 @@
+get:
+  summary: Получить настройки кнопки SOS
+  description: "Возвращает настройки кнопки SOS"
+  tags:
+    - Intercom
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              sosButtonUrl:
+                type: string
+                description: URL для отправки уведомления при нажатии кнопки SOS
+          example:
+            sosButtonUrl: "http://example.com/sos"
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "Failed to read configuration"
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Сообщение об ошибке авторизации
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          example:
+            error: "internal server error"
+
+post:
+  summary: Изменить настройки кнопки SOS
+  description: "Применяет новые настройки кнопки SOS"
+  tags:
+    - Intercom
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - sosButtonUrl
+          properties:
+            sosButtonUrl:
+              type: string
+              description: URL для отправки уведомления при нажатии кнопки SOS в формате 'sip:number@domain.com[:port]'
+        example:
+          sosButtonUrl: "sip:sos@sip.example.com:5440"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "ok"
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Сообщение об ошибке в запросе
+          example:
+            error: "missing required field: sos_button_url"
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Сообщение об ошибке авторизации
+          example:
+            error: "unauthorized"
+    '422':
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Сообщение об ошибке валидации данных
+          example:
+            error: "[sosButtonUrl] must be in format 'sip:number@domain.com[:port]' (example: sip:sos@sip.example.com:5440)"
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Сообщение о внутренней ошибке сервера
+          example:
+            error: "failed to store configuration"

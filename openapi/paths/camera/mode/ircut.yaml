@@ -1,0 +1,82 @@
+post:
+  summary: Установить режим управления IR-Cut фильтром
+  description: |
+    Переключает IR-Cut фильтр между ручным и автоматическим режимом работы.
+    В автоматическом режиме IR-Cut фильтр управляется автоматически на основе освещённости.
+    В ручном режиме состояние фильтра определяется текущим режимом камеры (день/ночь).
+  tags:
+    - Camera
+  security:
+    - basicAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - ircutAuto
+          properties:
+            ircutAuto:
+              type: boolean
+              description: true для автоматического управления IR-Cut, false для ручного
+        examples:
+          enable_auto:
+            summary: Включить автоматическое управление
+            value:
+              ircutAuto: true
+          disable_auto:
+            summary: Выключить автоматическое управление
+            value:
+              ircutAuto: false
+  responses:
+    '200':
+      description: Режим успешно изменён
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "success"
+    '400':
+      description: Ошибка валидации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          examples:
+            missing_field:
+              value:
+                error: "missing required field: ircutAuto"
+            invalid_type:
+              value:
+                error: "ircutAuto must be boolean"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "internal server error"

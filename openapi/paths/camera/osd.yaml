@@ -1,0 +1,198 @@
+get:
+  description: "Возвращает настройки экранного меню (OSD)"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              enable:
+                type: boolean
+                description: Включено ли OSD
+              positionX:
+                type: integer
+                description: X-координата позиции OSD
+              positionY:
+                type: integer
+                description: Y-координата позиции OSD
+              timeFormat:
+                type: string
+                description: Формат отображения времени
+              showResBit:
+                type: boolean
+                description: Показывать ли разрешение и битрейт
+              showWeek:
+                type: boolean
+                description: Показывать ли день недели
+              title:
+                type: string
+                description: Заголовок OSD
+              userOsd1:
+                type: object
+                description: Настройки пользовательского OSD 1
+                properties:
+                  title:
+                    type: string
+                    description: Текст пользовательского OSD 1
+                  positionX:
+                    type: integer
+                    description: X-координата позиции
+                  positionY:
+                    type: integer
+                    description: Y-координата позиции
+              userOsd2:
+                type: object
+                description: Настройки пользовательского OSD 2
+                properties:
+                  title:
+                    type: string
+                    description: Текст пользовательского OSD 2
+                  positionX:
+                    type: integer
+                    description: X-координата позиции
+                  positionY:
+                    type: integer
+                    description: Y-координата позиции
+              userOsd3:
+                type: object
+                description: Настройки пользовательского OSD 3
+                properties:
+                  title:
+                    type: string
+                    description: Текст пользовательского OSD 3
+                  positionX:
+                    type: integer
+                    description: X-координата позиции
+                  positionY:
+                    type: integer
+                    description: Y-координата позиции
+          example:
+            enable: true
+            positionX: 10
+            positionY: 10
+            timeFormat: "YYYY-MM-DD HH:mm:ss"
+            showResBit: true
+            showWeek: true
+            title: "Camera 1"
+            userOsd1:
+              title: "Floor 1"
+              positionX: 10
+              positionY: 30
+            userOsd2:
+              title: "Building A"
+              positionX: 10
+              positionY: 50
+            userOsd3:
+              title: "Main Entrance"
+              positionX: 10
+              positionY: 70
+  summary: Получить настройки OSD
+  tags:
+  - Camera
+post:
+  description: "Применяет новые настройки экранного меню (OSD)"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            enable:
+              type: boolean
+              description: Включить/выключить OSD
+            positionX:
+              type: integer
+              description: X-координата позиции OSD
+            positionY:
+              type: integer
+              description: Y-координата позиции OSD
+            timeFormat:
+              type: string
+              description: Формат отображения времени
+            showResBit:
+              type: boolean
+              description: Показывать ли разрешение и битрейт
+            showWeek:
+              type: boolean
+              description: Показывать ли день недели
+            title:
+              type: string
+              description: Заголовок OSD
+            userOsd1:
+              type: object
+              description: Настройки пользовательского OSD 1
+              properties:
+                title:
+                  type: string
+                  description: Текст пользовательского OSD 1
+                positionX:
+                  type: integer
+                  description: X-координата позиции
+                positionY:
+                  type: integer
+                  description: Y-координата позиции
+            userOsd2:
+              type: object
+              description: Настройки пользовательского OSD 2
+              properties:
+                title:
+                  type: string
+                  description: Текст пользовательского OSD 2
+                positionX:
+                  type: integer
+                  description: X-координата позиции
+                positionY:
+                  type: integer
+                  description: Y-координата позиции
+            userOsd3:
+              type: object
+              description: Настройки пользовательского OSD 3
+              properties:
+                title:
+                  type: string
+                  description: Текст пользовательского OSD 3
+                positionX:
+                  type: integer
+                  description: X-координата позиции
+                positionY:
+                  type: integer
+                  description: Y-координата позиции
+        example:
+          enable: true
+          positionX: 10
+          positionY: 10
+          timeFormat: "YYYY-MM-DD HH:mm:ss"
+          showResBit: true
+          showWeek: true
+          title: "Camera 1"
+          userOsd1:
+            title: "Floor 1"
+            positionX: 10
+            positionY: 30
+          userOsd2:
+            title: "Building A"
+            positionX: 10
+            positionY: 50
+          userOsd3:
+            title: "Main Entrance"
+            positionX: 10
+            positionY: 70
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "ok"
+  summary: Изменить настройки OSD
+  tags:
+  - Camera

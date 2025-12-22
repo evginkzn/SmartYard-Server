@@ -1,0 +1,96 @@
+post:
+  security:
+    - basicAuth: []
+  description: "Сбрасывает устройство на заводские настройки"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            retainNetwork:
+              type: boolean
+              description: Сохранить сетевые настройки устройства
+        examples:
+          reset_with_network_retention:
+            summary: Сброс с сохранением сетевых настроек
+            description: Устройство будет сброшено до заводских настроек, но текущие сетевые настройки будут сохранены
+            value:
+              retainNetwork: true
+          complete_factory_reset:
+            summary: Полный сброс до заводских настроек
+            description: Устройство будет полностью сброшено до заводских настроек, включая сетевые настройки
+            value:
+              retainNetwork: false
+          minimal_reset:
+            summary: Сброс без параметров (полный сброс)
+            description: Пустой объект приводит к полному сбросу устройства до заводских настроек
+            value: {}
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+          example:
+            status: "ok"
+    '400':
+      description: Неверный запрос
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки валидации
+          examples:
+            empty_body:
+              summary: Пустое тело запроса
+              value:
+                error: "Request body is required"
+            invalid_json:
+              summary: Невалидный JSON
+              value:
+                error: "Invalid JSON format"
+            invalid_retainNetwork:
+              summary: Неверный тип параметра retainNetwork
+              value:
+                error: "retainNetwork parameter must be boolean"
+            template_missing:
+              summary: Отсутствует файл шаблона конфигурации
+              value:
+                error: "Template config file is missing"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки аутентификации
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание внутренней ошибки сервера
+          example:
+            error: "Factory reset failed: internal server error"
+  summary: Сброс на заводские настройки
+  tags:
+  - Device

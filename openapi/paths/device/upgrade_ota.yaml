@@ -1,0 +1,65 @@
+post:
+  summary: Обновить прошивку OTA
+  description: |
+    Инициирует процесс обновления прошивки устройства через OTA (Over-The-Air).
+    
+    Этот метод запускает автоматическое обновление прошивки с удаленного сервера.
+    После успешного запуска процесса обновления, устройство автоматически перезагрузится
+    для применения новой прошивки.
+    
+    **Внимание:** Во время обновления устройство будет недоступно.
+  tags:
+    - Device
+  security:
+    - basicAuth: []
+  responses:
+    '204':
+      description: |
+        Обновление прошивки успешно запущено.
+        
+        Устройство начнет процесс обновления и автоматически перезагрузится
+        после завершения. Статус 204 означает, что запрос принят к обработке,
+        но содержимое ответа отсутствует.
+    '400':
+      description: Ошибка при запуске обновления прошивки
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки
+          examples:
+            update_failed:
+              value:
+                error: "Failed to initiate OTA update"
+            server_unavailable:
+              value:
+                error: "OTA server is not available"
+            invalid_firmware:
+              value:
+                error: "Invalid firmware version"
+    '401':
+      description: Ошибка аутентификации
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание ошибки аутентификации
+          example:
+            error: "unauthorized"
+    '500':
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Описание внутренней ошибки
+                example: "internal server error"

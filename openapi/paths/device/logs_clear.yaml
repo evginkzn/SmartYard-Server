@@ -1,0 +1,22 @@
+post:
+  description: "Очищает логи устройства"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Статус выполнения операции
+              message:
+                type: string
+                description: Сообщение об успешном выполнении
+          example:
+            status: "ok"
+            message: "success"
+  summary: Очистить логи устройства
+  tags:
+  - Device
