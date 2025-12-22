@@ -1,6 +1,6 @@
 {
     "title": "Sputnik IP",
-    "vendor": "SPUTNIK",
+    "vendor": "SPUTNIKIP",
     "model": "SputnikIP",
     "class": "sputnikip",
     "eventServer": "sputnikip",
