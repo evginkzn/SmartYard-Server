@@ -30,12 +30,12 @@
                         fclose($fp);
                         return [
                             "status" => "ok",
-                            "message" => i18n("monitoring.online"),
+                            "message" => "Online",
                         ];
                     } else {
                         return [
                             "status" => "error",
-                            "message" => i18n("monitoring.offline"),
+                            "message" => "Offline",
                         ];
                     }
                 }
@@ -43,7 +43,7 @@
 
             return [
                 "status" => "unknown",
-                "message" => i18n("monitoring.unknown"),
+                "message" => "Unknown",
             ];
         }
 
