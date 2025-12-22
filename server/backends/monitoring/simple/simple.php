@@ -29,12 +29,12 @@
                     if ($fp) {
                         fclose($fp);
                         return [
-                            "status" => "ok",
+                            "status" => "OK",
                             "message" => "Online",
                         ];
                     } else {
                         return [
-                            "status" => "error",
+                            "status" => "Offline",
                             "message" => "Offline",
                         ];
                     }
@@ -42,7 +42,7 @@
             }
 
             return [
-                "status" => "unknown",
+                "status" => "Unknown",
                 "message" => "Unknown",
             ];
         }
