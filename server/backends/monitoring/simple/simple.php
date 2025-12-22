@@ -18,19 +18,33 @@
 
         public function deviceStatus($deviceType, $deviceId)
         {
-            switch ($deviceType) {
-                case 'domophone':
-                    return [
-                        "status" => "unknown",
-                        "message" => i18n("monitoring.unknown"),
-                    ];
+            // Try to ping device directly
+            if (is_array($deviceId) && isset($deviceId['url'])) {
+                $url = parse_url($deviceId['url']);
+                $host = $url['host'] ?? '';
+                $port = $url['port'] ?? ($url['scheme'] === 'https' ? 443 : 80);
 
-                case 'camera':
-                    return [
-                        "status" => "unknown",
-                        "message" => i18n("monitoring.unknown"),
-                    ];
+                if ($host) {
+                    $fp = @stream_socket_client("$host:$port", $errno, $errstr, 2);
+                    if ($fp) {
+                        fclose($fp);
+                        return [
+                            "status" => "ok",
+                            "message" => i18n("monitoring.online"),
+                        ];
+                    } else {
+                        return [
+                            "status" => "error",
+                            "message" => i18n("monitoring.offline"),
+                        ];
+                    }
+                }
             }
+
+            return [
+                "status" => "unknown",
+                "message" => i18n("monitoring.unknown"),
+            ];
         }
 
         /**
@@ -39,7 +53,19 @@
 
         public function devicesStatus($deviceType, $hosts)
         {
-            return false;
+            if (empty($hosts)) {
+                return false;
+            }
+
+            $result = [];
+            foreach ($hosts as $host) {
+                $hostId = $host['hostId'] ?? null;
+                if ($hostId !== null) {
+                    $result[$hostId] = $this->deviceStatus($deviceType, $host);
+                }
+            }
+
+            return empty($result) ? false : $result;
         }
 
         /**

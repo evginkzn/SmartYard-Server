@@ -1147,7 +1147,7 @@
 
                     if ($targetStatus) {
                         foreach ($domophones as &$domophone) {
-                            $domophone["status"] = $targetStatus[$domophone["domophoneId"]]['status'];
+                            $domophone["status"] = $targetStatus[$domophone["domophoneId"]] ?? null;
                         }
                     }
                 }
